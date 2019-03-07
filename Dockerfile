@@ -26,24 +26,28 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/main\nhttp://dl
 	make
 
 
-ARG ALPINE_BRANCH
+ARG ALPINE_BRANCH="latest"
 
 FROM alpine:$ALPINE_BRANCH
 
+ARG VERSION="latest"
 ARG BUILD_DATE
+ARG VCS_REF
+
 ARG ALPINE_BRANCH
 ARG RELEASE_123SOLAR
 ARG RELEASE_METERN
 
-LABEL 	MAINTANER Edoardo Federici <hello@edoardofederici.com> \
-        org.label-schema.schema-version = "1.0" \
-		org.label-schema.name="123solar-metern" \
+LABEL 	maintainer="Edoardo Federici <hello@edoardofederici.com>" \
+        org.label-schema.schema-version="1.0.0-rc.1" \
 		org.label-schema.vendor="Edoardo Federici" \
-		org.label-schema.description="Docker image to run 123Solar and meterN web apps" \
 		org.label-schema.url="https://edoardofederici.com" \
-        org.label-schema.vcs-url="https://github.com/EdoFede/123Solar-meterN" \
+		org.label-schema.name="123solar-metern" \
+		org.label-schema.description="Docker image for 123Solar and meterN web apps" \
+        org.label-schema.version=$VERSION \
         org.label-schema.build-date=$BUILD_DATE \
-        org.label-schema.version="1.0" \
+        org.label-schema.vcs-url="https://github.com/EdoFede/123Solar-meterN" \
+        org.label-schema.vcs-ref=$VCS_REF \
         org.label-schema.docker.cmd="SERVER_PORT=10080 && docker create --name 123Solar-meterN --device=/dev/ttyUSB0:rwm --volume 123solar_config:/var/www/123solar/config --volume 123solar_data:/var/www/123solar/data --volume metern_config:/var/www/metern/config --volume metern_data:/var/www/metern/data -p $SERVER_PORT:80 edofede/123solar-metern:latest"
 
 STOPSIGNAL SIGCONT
