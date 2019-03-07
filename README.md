@@ -1,6 +1,6 @@
 # Docker image for 123Solar and meterN
 
-[![](https://badge.imagelayers.io/edofede/123solar-metern:latest.svg)](https://imagelayers.io/?images=edofede/123solar-metern:latest 'Get your own badge on imagelayers.io')
+[![](https://images.microbadger.com/badges/image/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own image badge on microbadger.com")   [![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own version badge on microbadger.com")   [![](https://images.microbadger.com/badges/commit/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own commit badge on microbadger.com")
 
 A self-configuring Docker image to run 123Solar and meterN energy metering and monitoring.
 
