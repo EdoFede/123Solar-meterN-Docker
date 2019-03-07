@@ -20,7 +20,6 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" >> /etc/apk/rep
 	make clean && \
 	make
 
-
 ARG ALPINE_BRANCH
 FROM alpine:$ALPINE_BRANCH
 
