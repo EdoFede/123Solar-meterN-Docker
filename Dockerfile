@@ -128,7 +128,7 @@ RUN sed -i \
 
 COPY tools/* /tmp/tools/
 
-# Copying tools
+ # Copying tools
 RUN	mkdir -p /var/www/comapps && \
 	mkdir -p /var/www/scripts && \
 	cp -f /tmp/tools/nginx.conf /etc/nginx/ && \
