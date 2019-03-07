@@ -28,6 +28,7 @@ Flavio has also published many very detailed and well done [guides](http://www.f
 
 ## How to use
 
+### Container creation
 You can simply create and run a Docker container from the [image on the Docker hub](https://hub.docker.com/r/edofede/123solar-metern) by running:
 
     SERVER_PORT=10080 && \
@@ -45,6 +46,7 @@ By changing `SERVER_PORT` you tells on which TCP port of your Docker host the we
 The `USB_DEVICE` variable is the address of the USB>RS485 interface that is used to communicate with inverters and meters.
 Four volumes are created to persist configurations and datas of the apps, so you can delete and re-create the Docker container from the image, without loosing configs and data.
 
+### First access
 The web interfaces are available at these addresses:
 
     http://<Docker host/IP>:<SERVER_PORT>/123solar/
@@ -54,8 +56,17 @@ For example (my case):
     http://nas.local:10080/123solar/
     http://nas.local:10080/metern/
 
+### Administrator passwords
+The default admin accounts to access the administrator views are:
+Username: admin
+Password: admin
 
-I've included a `config_daemon.php` template file (provided by [Flavio]()http://www.flanesi.it/doku/doku.php?id=metern_mono_modbus#avvio_file_pooler485_per_lettura_consumi) that points to meter address 2.
+You can change the password later by using this command:
+
+	docker exec -i -t 123Solar-meterN bash -c 'printf "admin:$(openssl passwd -crypt)\n" > /var/www/123solar/config/.htpasswd && cp /var/www/123solar/config/.htpasswd /var/www/metern/config/.htpasswd'
+
+### meterN ModBus setup
+I've included a `config_daemon.php` template file (provided by [Flavio](http://www.flanesi.it/doku/doku.php?id=metern_mono_modbus#avvio_file_pooler485_per_lettura_consumi) that points to meter address 2.
 If your meter address, USB device address or communication speed are different, edit this line:
 
     exec("pooler485 2 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &");
@@ -68,10 +79,12 @@ If you have more than one meter on a single RS485 line, you can add the meter ID
 
     exec('pooler485 1,2,3 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &');
 
-
+### Extra features
 I've developed and included a simple `reqLineValues.php` script, that can be used to graph also the mains line parameters (voltage, current, frequency and cosphi).
+More infos later.
 
-If you need to edit some file or configuration inside the container, you can simply access it by using this command:
+### Container shell access
+If you need to edit some file or configuration inside the container, you can simply access the shell using this command while the container is running:
 
     docker exec -i -t 123Solar-meterN bash
 
