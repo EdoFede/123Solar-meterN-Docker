@@ -3,3 +3,5 @@
 *.md
 !README*.md
 buildImage.sh
+buildLocal.sh
+

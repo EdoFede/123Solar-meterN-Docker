@@ -1,13 +1,8 @@
-ARG ALPINE_BRANCH=3.9
-
+ARG ALPINE_BRANCH
 FROM alpine:$ALPINE_BRANCH as builder
-LABEL MAINTANER Edoardo Federici <hello@edoardofederici.com>
-
-ARG ALPINE_BRANCH=3.9
-ENV ALPINE_BRANCH $ALPINE_BRANCH
 
 # Build sdm120c comm app
-RUN printf "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/main\nhttp://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/community\nhttp://dl-cdn.alpinelinux.org/alpine/edge/testing\n" > /etc/apk/repositories && \
+RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" >> /etc/apk/repositories && \
 	apk update && \
 	apk --no-cache add \
 		libmodbus-dev \
@@ -26,39 +21,15 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/main\nhttp://dl
 	make
 
 
-ARG ALPINE_BRANCH="latest"
-
+ARG ALPINE_BRANCH
 FROM alpine:$ALPINE_BRANCH
 
-ARG VERSION="latest"
-ARG BUILD_DATE
-ARG VCS_REF
-
-ARG ALPINE_BRANCH
-ARG RELEASE_123SOLAR
-ARG RELEASE_METERN
-
-LABEL 	maintainer="Edoardo Federici <hello@edoardofederici.com>" \
-        org.label-schema.schema-version="1.0.0-rc.1" \
-		org.label-schema.vendor="Edoardo Federici" \
-		org.label-schema.url="https://edoardofederici.com" \
-		org.label-schema.name="123solar-metern" \
-		org.label-schema.description="Docker image for 123Solar and meterN web apps" \
-        org.label-schema.version=$VERSION \
-        org.label-schema.build-date=$BUILD_DATE \
-        org.label-schema.vcs-url="https://github.com/EdoFede/123Solar-meterN" \
-        org.label-schema.vcs-ref=$VCS_REF \
-        org.label-schema.docker.cmd="SERVER_PORT=10080 && docker create --name 123Solar-meterN --device=/dev/ttyUSB0:rwm --volume 123solar_config:/var/www/123solar/config --volume 123solar_data:/var/www/123solar/data --volume metern_config:/var/www/metern/config --volume metern_data:/var/www/metern/data -p $SERVER_PORT:80 edofede/123solar-metern:latest"
-
 STOPSIGNAL SIGCONT
-
-ENV ALPINE_BRANCH=$ALPINE_BRANCH RELEASE_123SOLAR=$RELEASE_123SOLAR RELEASE_METERN=$RELEASE_METERN
 
 COPY --from=builder /build/SDM120C/sdm120c /usr/local/bin/
 
 # Install required software
-RUN	printf "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/main\nhttp://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/community\n" > /etc/apk/repositories && \
-	apk update && \
+RUN	apk update && \
 	apk --no-cache add \
 		bash \
 		curl \
@@ -81,16 +52,18 @@ RUN	printf "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/main\nhttp://dl
 		php7-posix \
 		php7-xml \
 		rrdtool && \
-	rm -rf /var/cache/apk/* && \
 
-	printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" > /etc/apk/repositories && \
+	# Add testing repository for libmodbus
+	printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" >> /etc/apk/repositories && \
 	apk update && \
 	apk --no-cache add \
 		libmodbus \
 		libmodbus-doc && \
 	rm -rf /var/cache/apk/* && \
-	printf "http://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/main\nhttp://dl-cdn.alpinelinux.org/alpine/v$ALPINE_BRANCH/community\n" > /etc/apk/repositories && \
+	# Remove testing repository
+	sed -i '$ d' /etc/apk/repositories && \
 
+	# Set local timezone
 	cp /usr/share/zoneinfo/Europe/Rome /etc/localtime
 
 # Setup base system and services
@@ -112,8 +85,8 @@ RUN sed -i \
 
 	sed -i 's/^\(tty\d\:\:\)/#\1/g' /etc/inittab && \
 	mkdir -p /etc/runit/1.d && \
-	printf "#!/usr/bin/env sh\nset -eu\n\nchmod 100 /etc/runit/stopit\n\n/bin/run-parts --exit-on-error /etc/runit/1.d || exit 100\n" > /etc/runit/1 && \
-	printf "#!/usr/bin/env sh\nset -eu\n\n/usr/local/bin/start_pooling.sh\nrunsvdir -P /etc/service 'log: ...............'\n" > /etc/runit/2 && \
+	printf "#!/usr/bin/env sh\nset -eu\n\nchmod 100 /etc/runit/stopit\n\n/var/www/scripts/update123solarAndMetern.sh || true\n/bin/run-parts --exit-on-error /etc/runit/1.d || exit 100\n" > /etc/runit/1 && \
+	printf "#!/usr/bin/env sh\nset -eu\n\n/usr/local/bin/start_pooling.sh\nrunsvdir -P /etc/service 'log: .....'\n" > /etc/runit/2 && \
 	printf "#!/usr/bin/env sh\nset -eu\nexec 2>&1\n\necho 'Stopping services...'\nsv -w196 force-stop /etc/service/*\nsv exit /etc/service/*\n\n# kill running processes\nfor PID in \$(ps -eo "pid,stat" |grep 'Z' |tr -d ' ' |sed 's/.$//' |sed '1d'); do\n    timeout -t 5 /bin/sh -c \"kill \$PID && wait \$PID || kill -9 \$PID\"\ndone\n" > /etc/runit/3 && \
 	chmod 755 /etc/runit/1 /etc/runit/2 /etc/runit/3 && \
 	touch /etc/runit/reboot && \
@@ -154,31 +127,32 @@ RUN sed -i \
 	mkdir /etc/nginx/sites-available && \
 	mkdir /etc/nginx/sites-enabled
 
-#COPY ./nginx.conf /etc/nginx/
-#COPY ./default /etc/nginx/sites-available/
-#COPY ./reqLineValues.php /var/www/comapps/
-COPY tools/nginx.conf tools/default tools/reqLineValues.php /tmp/tools/
+COPY tools/* /tmp/tools/
 
-# Setup web services
+### Setup web services ###
+# Copying tools
 RUN	mkdir -p /var/www/comapps && \
+	mkdir -p /var/www/scripts && \
 	cp -f /tmp/tools/nginx.conf /etc/nginx/ && \
 	cp -f /tmp/tools/default /etc/nginx/sites-available/ && \
 	cp -f /tmp/tools/reqLineValues.php /var/www/comapps/ && \
+	cp -f /tmp/tools/update123solarAndMetern.sh /var/www/scripts/ &&\
 	rm -rf /tmp/tools/ && \
+	chmod 755 /var/www/scripts/update123solarAndMetern.sh && \
 	chmod 4711 /usr/local/bin/sdm120c && \
 	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ && \
 
+	# Build dummy version files for update script
+	mkdir -p /var/www/123solar/scripts && \
+	mkdir -p /var/www/metern/scripts && \
+	printf "\$VERSION='123Solar 1.0';\n" > /var/www/123solar/scripts/version.php && \
+	printf "\$VERSION='meterN 0.0.1';\n" > /var/www/metern/scripts/version.php && \
+
 	# Download and install 123Solar and meterN
-	cd /var/www && \
-	wget -q http://www.123solar.org/downloads/123solar/123solar$RELEASE_123SOLAR.tar.gz && \
-	tar -xzf 123solar*.tar.gz && \
-	rm 123solar*.tar.gz && \
-	wget -q http://www.123solar.org/downloads/metern/metern$RELEASE_METERN.tar.gz && \
-	tar -xzf metern*.tar.gz && \
-	rm metern*.tar.gz && \
+	/var/www/scripts/update123solarAndMetern.sh && \
 	
 	# Download and install common apps
-	cd comapps && \
+	cd /var/www/comapps && \
 	wget -q http://www.flanesi.it/blog/download/comapps_solarstretch.zip && \
 	unzip -q comapps_solarstretch.zip && \
 	rm comapps_solarstretch.zip && \
@@ -213,6 +187,22 @@ RUN	mkdir -p /var/www/comapps && \
 	# Create startup script to begin data polling after boot
 	printf '#!/bin/sh\nsh -c "sleep 15 && curl -s http://localhost/metern/scripts/bootmn.php &"\nsh -c "sleep 15 && curl -s http://localhost/123solar/scripts/boot123s.php &"\n' > /usr/local/bin/start_pooling.sh && \
 	chmod 755 /usr/local/bin/start_pooling.sh
+
+ARG VERSION="latest"
+ARG BUILD_DATE
+ARG VCS_REF
+
+LABEL 	maintainer="Edoardo Federici <hello@edoardofederici.com>" \
+		org.label-schema.schema-version="1.0.0-rc.1" \
+		org.label-schema.vendor="Edoardo Federici" \
+		org.label-schema.url="https://edoardofederici.com" \
+		org.label-schema.name="123solar-metern" \
+		org.label-schema.description="Docker image for 123Solar and meterN web apps" \
+		org.label-schema.version=$VERSION \
+		org.label-schema.build-date=$BUILD_DATE \
+		org.label-schema.vcs-url="https://github.com/EdoFede/123Solar-meterN" \
+		org.label-schema.vcs-ref=$VCS_REF \
+		org.label-schema.docker.cmd="SERVER_PORT=10080 && docker create --name 123Solar-meterN --device=/dev/ttyUSB0:rwm --volume 123solar_config:/var/www/123solar/config --volume 123solar_data:/var/www/123solar/data --volume metern_config:/var/www/metern/config --volume metern_data:/var/www/metern/data -p $SERVER_PORT:80 edofede/123solar-metern:latest"
 
 EXPOSE 80
 
