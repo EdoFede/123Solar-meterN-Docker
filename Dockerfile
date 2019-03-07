@@ -128,7 +128,6 @@ RUN sed -i \
 
 COPY tools/* /tmp/tools/
 
-### Setup web services ###
 # Copying tools
 RUN	mkdir -p /var/www/comapps && \
 	mkdir -p /var/www/scripts && \
