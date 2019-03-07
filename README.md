@@ -2,7 +2,7 @@
 
 [![](https://badge.imagelayers.io/edofede/123solar-metern:latest.svg)](https://imagelayers.io/?images=edofede/123solar-metern:latest 'Get your own badge on imagelayers.io')
 
-An self-configuring Docker image to run 123Solar and meterN energy metering and monitoring.
+A self-configuring Docker image to run 123Solar and meterN energy metering and monitoring.
 
 
 ## Introduction
