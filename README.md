@@ -1,23 +1,23 @@
 # Docker image for 123Solar and meterN
-
-[![](https://images.microbadger.com/badges/image/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own image badge on microbadger.com")   [![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own version badge on microbadger.com")   [![](https://images.microbadger.com/badges/commit/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own commit badge on microbadger.com")
-
 A self-configuring Docker image to run 123Solar and meterN energy metering and monitoring.
 
+[![](https://images.microbadger.com/badges/image/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own version badge on microbadger.com")
+![](https://img.shields.io/github/last-commit/edofede/123solar-metern.svg)
+![](https://img.shields.io/github/license/EdoFede/123Solar-meterN.svg)
+
+![](https://img.shields.io/docker/pulls/edofede/123solar-metern.svg)
+![](https://img.shields.io/docker/cloud/automated/edofede/123solar-metern.svg)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4617241ea4b540f7adf243e1e76ea911)](https://www.codacy.com/app/EdoFede/123Solar-meterN?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EdoFede/123Solar-meterN&amp;utm_campaign=Badge_Grade)
 
 ## Introduction
-
 [123Solar](https://www.123solar.org) is a logger app for photovoltaic inverter(s)
 [meterN](https://metern.org) is a metering and monitoring app for energy management, that can be used also for monitoring others meters like: water, gas, temperature, etc...
 
-
 ## Why this Docker image
-
 After many hours of work to run these apps on my NAS, using Docker, I've decided to develop a ready-to-go image, in order to simplify the installation process.
 
-
 ## Credits
-
 Both 123Solar and meterN apps are developed by Jean-Marc Louviaux and are based on Web interfaces with PHP and shell scripts backend.
 
 The [SDM120C](https://github.com/gianfrdp/SDM120C) script used to read meter data via ModBus is developed by [Gianfranco Di Prinzio](https://github.com/gianfrdp).
@@ -25,9 +25,7 @@ The [SDM120C](https://github.com/gianfrdp/SDM120C) script used to read meter dat
 Some of the interface scripts used to get data inside the Web apps are written and maintained by [Flavio Anesi](http://www.flanesi.it/blog/about/).
 Flavio has also published many very detailed and well done [guides](http://www.flanesi.it/doku/doku.php?id=start) (in Italian) about the whole setup for these apps.  Since these are the most detailed guides you find online about this topic, I suggest you read them.
 
-
 ## How to use
-
 ### Container creation
 You can simply create and run a Docker container from the [image on the Docker hub](https://hub.docker.com/r/edofede/123solar-metern) by running:
 
@@ -88,18 +86,15 @@ If you need to edit some file or configuration inside the container, you can sim
 
     docker exec -i -t 123Solar-meterN bash
 
-
 ## Docker image details
-
 The image is based on Alpine linux for lightweight distribution and mainly consist of:
- * [runit](http://smarden.org/runit/) init scheme and service supervision
- * [Nginx](https://nginx.org/en/) web server
- * [PHP-FPM](https://php-fpm.org) FastCGI process manager for PHP interpeter
+
+* [runit](http://smarden.org/runit/) init scheme and service supervision
+* [Nginx](https://nginx.org/en/) web server
+* [PHP-FPM](https://php-fpm.org) FastCGI process manager for PHP interpeter
 
 All components are automatically configured by the Docker image
-
  
 ## Limitation & future enhancement
-
 At the moment, the image supports only one USB>RS485 communication interface, so you must have all inverters and meters on the same RS485 bus.
 I plan to create a complete guide to run this Docker image on Synology NAS on [my site](http://edoardofederici.com).

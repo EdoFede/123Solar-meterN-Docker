@@ -2,7 +2,7 @@ ARG ALPINE_BRANCH
 FROM alpine:$ALPINE_BRANCH as builder
 
 # Build sdm120c comm app
-RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" >> /etc/apk/repositories && \
+RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
 	apk update && \
 	apk --no-cache add \
 		libmodbus-dev \
@@ -11,20 +11,18 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" >> /etc/apk/rep
 		file \
 		gcc \
 		g++ \
-		git && \
+		git
 
-	mkdir /build && \
-	cd /build && \
-	git clone https://github.com/gianfrdp/SDM120C && \
-	cd SDM120C && \
-	make clean && \
-	make
+RUN	mkdir /build && \
+	git clone https://github.com/gianfrdp/SDM120C /build && \
+	make -s -C /build/ clean && \
+	make -s -C /build/
 
 ARG ALPINE_BRANCH
 FROM alpine:$ALPINE_BRANCH
 
 STOPSIGNAL SIGCONT
-COPY --from=builder /build/SDM120C/sdm120c /usr/local/bin/
+COPY --from=builder /build/sdm120c /usr/local/bin/
 
 # Install required software
 RUN	apk update && \
@@ -52,7 +50,7 @@ RUN	apk update && \
 		rrdtool && \
 
 	# Add testing repository for libmodbus
-	printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\n" >> /etc/apk/repositories && \
+	printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
 	apk update && \
 	apk --no-cache add \
 		libmodbus \
@@ -83,16 +81,16 @@ RUN sed -i \
 
 	sed -i 's/^\(tty\d\:\:\)/#\1/g' /etc/inittab && \
 	mkdir -p /etc/runit/1.d && \
-	printf "#!/usr/bin/env sh\nset -eu\n\nchmod 100 /etc/runit/stopit\n\n/var/www/scripts/update123solarAndMetern.sh || true\n/bin/run-parts --exit-on-error /etc/runit/1.d || exit 100\n" > /etc/runit/1 && \
-	printf "#!/usr/bin/env sh\nset -eu\n\n/usr/local/bin/start_pooling.sh\nrunsvdir -P /etc/service 'log: .....'\n" > /etc/runit/2 && \
-	printf "#!/usr/bin/env sh\nset -eu\nexec 2>&1\n\necho 'Stopping services...'\nsv -w196 force-stop /etc/service/*\nsv exit /etc/service/*\n\n# kill running processes\nfor PID in \$(ps -eo "pid,stat" |grep 'Z' |tr -d ' ' |sed 's/.$//' |sed '1d'); do\n    timeout -t 5 /bin/sh -c \"kill \$PID && wait \$PID || kill -9 \$PID\"\ndone\n" > /etc/runit/3 && \
+	printf "#!/usr/bin/env sh\\nset -eu\\n\\nchmod 100 /etc/runit/stopit\\n\\n/var/www/scripts/update123solarAndMetern.sh || true\\n/bin/run-parts --exit-on-error /etc/runit/1.d || exit 100\\n" > /etc/runit/1 && \
+	printf "#!/usr/bin/env sh\\nset -eu\\n\\n/usr/local/bin/start_pooling.sh\\nrunsvdir -P /etc/service 'log: .....'\\n" > /etc/runit/2 && \
+	printf "#!/usr/bin/env sh\\nset -eu\\nexec 2>&1\\n\\necho 'Stopping services...'\\nsv -w196 force-stop /etc/service/*\\nsv exit /etc/service/*\\n\\n# kill running processes\\nfor PID in \$(ps -eo "pid,stat" |grep 'Z' |tr -d ' ' |sed 's/.$//' |sed '1d'); do\\n    timeout -t 5 /bin/sh -c \"kill \$PID && wait \$PID || kill -9 \$PID\"\\ndone\\n" > /etc/runit/3 && \
 	chmod 755 /etc/runit/1 /etc/runit/2 /etc/runit/3 && \
 	touch /etc/runit/reboot && \
 	touch /etc/runit/stopit && \
 
 	# Configure PHP-FPM service
 	mkdir -p /etc/sv/php-fpm && \
-	printf "#!/usr/bin/env sh\nset -eu\nexec 2>&1\n\nCMD=/usr/sbin/php-fpm7\n\nexec \${CMD}\n" > /etc/sv/php-fpm/run && \
+	printf "#!/usr/bin/env sh\\nset -eu\\nexec 2>&1\\n\\nCMD=/usr/sbin/php-fpm7\\n\\nexec \${CMD}\\n" > /etc/sv/php-fpm/run && \
 	chmod 755 /etc/sv/php-fpm/run && \
 	ln -sf /etc/sv/php-fpm /etc/service && \
 	mkdir -p /run/php && \
@@ -117,10 +115,10 @@ RUN sed -i \
 	adduser nginx uucp && \
 	mkdir -p /etc/service && \
 	mkdir -p /etc/sv/nginx && \
-	printf "#!/usr/bin/env sh\nset -eu\nexec 2>&1\n\nCMD=/usr/sbin/nginx\nPID=/run/nginx/nginx.pid\n\ninstall -d -o nginx -g nginx \${PID%%/*}\n\n\${CMD} -t -q || exit 0\n\nexec \${CMD} -c /etc/nginx/nginx.conf -g \"pid \$PID; daemon off;\"\n" > /etc/sv/nginx/run && \
+	printf "#!/usr/bin/env sh\\nset -eu\\nexec 2>&1\\n\\nCMD=/usr/sbin/nginx\\nPID=/run/nginx/nginx.pid\\n\\ninstall -d -o nginx -g nginx \${PID%%/*}\\n\\n\${CMD} -t -q || exit 0\\n\\nexec \${CMD} -c /etc/nginx/nginx.conf -g \"pid \$PID; daemon off;\"\\n" > /etc/sv/nginx/run && \
 	chmod 755 /etc/sv/nginx/run && \
 	ln -sf /etc/sv/nginx /etc/service && \
-	sed -i "s/\/var\/log\/nginx\/access.log/off/g" /etc/nginx/nginx.conf && \
+	sed -i "s/\\/var\\/log\\/nginx\\/access.log/off/g" /etc/nginx/nginx.conf && \
 	rm -f /etc/nginx/conf.d/default.conf && \
 	mkdir /etc/nginx/sites-available && \
 	mkdir /etc/nginx/sites-enabled
@@ -134,6 +132,7 @@ RUN	mkdir -p /var/www/comapps && \
 	cp -f /tmp/tools/default /etc/nginx/sites-available/ && \
 	cp -f /tmp/tools/reqLineValues.php /var/www/comapps/ && \
 	cp -f /tmp/tools/update123solarAndMetern.sh /var/www/scripts/ &&\
+	cp -f /tmp/tools/updateComapps.sh /var/www/scripts/ &&\
 	rm -rf /tmp/tools/ && \
 	chmod 755 /var/www/scripts/update123solarAndMetern.sh && \
 	chmod 4711 /usr/local/bin/sdm120c && \
@@ -142,30 +141,25 @@ RUN	mkdir -p /var/www/comapps && \
 	# Build dummy version files for update script
 	mkdir -p /var/www/123solar/scripts && \
 	mkdir -p /var/www/metern/scripts && \
-	printf "\$VERSION='123Solar 1.0';\n" > /var/www/123solar/scripts/version.php && \
-	printf "\$VERSION='meterN 0.0.1';\n" > /var/www/metern/scripts/version.php && \
+	printf "\$VERSION='123Solar 1.0';\\n" > /var/www/123solar/scripts/version.php && \
+	printf "\$VERSION='meterN 0.0.1';\\n" > /var/www/metern/scripts/version.php && \
 
 	# Download and install 123Solar and meterN
 	/var/www/scripts/update123solarAndMetern.sh && \
 	
 	# Download and install common apps
-	cd /var/www/comapps && \
-	wget -q http://www.flanesi.it/blog/download/comapps_solarstretch.zip && \
-	unzip -q comapps_solarstretch.zip && \
-	rm comapps_solarstretch.zip && \
-	chmod 755 * && \
-	cd .. && \
+	/var/www/scripts/updateComapps.sh && \
 	
 	# Set inizial account (Username: admin - Password:admin) for admin section
-	printf "admin:$(openssl passwd -crypt admin)\n" > /var/www/123solar/config/.htpasswd && \
-	printf "admin:$(openssl passwd -crypt admin)\n" > /var/www/metern/config/.htpasswd && \
+	printf "admin:$(openssl passwd -crypt admin)\\n" > /var/www/123solar/config/.htpasswd && \
+	printf "admin:$(openssl passwd -crypt admin)\\n" > /var/www/metern/config/.htpasswd && \
 	
 	# Set permission and remove windows EOL chars
 	chown -R nginx:www-data /var/www && \
 	rm -rf /var/www/localhost && \
 	chmod 755 /var/www/123solar/ /var/www/metern/ /var/www/comapps/ && \
 	sed -i -e 's/\r$//' /var/www/comapps/* && \
-	printf '\n' >> /var/www/comapps/pooler485.sh && \
+	printf "\\n" >> /var/www/comapps/pooler485.sh && \
 	
 	# Link common apps to /usr/local/bin
 	ln -s /var/www/comapps/cleanlog.sh /usr/local/bin/cleanlog && \
@@ -182,7 +176,7 @@ RUN	mkdir -p /var/www/comapps && \
 	ln -s /var/www/comapps/testcom.php /usr/local/bin/testcom && \
 
 	# Create startup script to begin data polling after boot
-	printf '#!/bin/sh\nsh -c "sleep 15 && curl -s http://localhost/metern/scripts/bootmn.php &"\nsh -c "sleep 15 && curl -s http://localhost/123solar/scripts/boot123s.php &"\n' > /usr/local/bin/start_pooling.sh && \
+	printf "#!/bin/sh\\nsh -c \"sleep 15 && curl -s http://localhost/metern/scripts/bootmn.php &\"\\nsh -c \"sleep 15 && curl -s http://localhost/123solar/scripts/boot123s.php &\"\\n" > /usr/local/bin/start_pooling.sh && \
 	chmod 755 /usr/local/bin/start_pooling.sh
 
 ARG VERSION="latest"

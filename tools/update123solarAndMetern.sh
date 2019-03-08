@@ -50,18 +50,18 @@ if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	tar -xzf 123solar*.tar.gz && \
 	rm -rf 123solar*.tar.gz
 	if [[ $? -ne 0 ]] ; then
-    	logError "Error during 123Solar download/unpack. Exiting."
+		logError "Error during 123Solar download/unpack. Exiting."
 		logTitle "Update checking done"
-    	exit 1
-    fi
+		exit 1
+	fi
 
-    # Do not overwrite config and data directories
-    if [ -d /var/www/123solar/config ]; then
-    	rm -rf 123solar/config/
-    fi
-    if [ -d /var/www/123solar/data ]; then
-    	rm -rf 123solar/data/
-    fi
+	# Do not overwrite config and data directories
+	if [ -d /var/www/123solar/config ]; then
+		rm -rf 123solar/config/
+	fi
+	if [ -d /var/www/123solar/data ]; then
+		rm -rf 123solar/data/
+	fi
 
 	cp -Rf 123solar/* /var/www/123solar/ && \
 	cd / && \
@@ -69,11 +69,11 @@ if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	chown -R nginx:www-data /var/www/123solar
 
 	if [[ $? -ne 0 ]] ; then
-    	logError "Error during 123Solar update. Exiting."
+		logError "Error during 123Solar update. Exiting."
 		logTitle "Update checking done"
-    	exit 1
-    else
-    	logNormal "123Solar updated successfully"
+		exit 1
+	else
+		logNormal "123Solar updated successfully"
 	fi
 fi
 
@@ -87,18 +87,18 @@ if [ "$lastVersMetern" != "$instVersMetern" ]; then
 	tar -xzf metern*.tar.gz && \
 	rm -rf metern*.tar.gz
 	if [[ $? -ne 0 ]] ; then
-    	logError "Error during meterN download/unpack. Exiting."
+		logError "Error during meterN download/unpack. Exiting."
 		logTitle "Update checking done"
-    	exit 1
-    fi
+		exit 1
+	fi
 
-    # Do not overwrite config and data directories
-    if [ -d /var/www/metern/config ]; then
-    	rm -rf metern/config/
-    fi
-    if [ -d /var/www/metern/data ]; then
-    	rm -rf metern/data/
-    fi
+	# Do not overwrite config and data directories
+	if [ -d /var/www/metern/config ]; then
+		rm -rf metern/config/
+	fi
+	if [ -d /var/www/metern/data ]; then
+		rm -rf metern/data/
+	fi
 
 	cp -Rf metern/* /var/www/metern/ && \
 	cd / && \
@@ -106,11 +106,11 @@ if [ "$lastVersMetern" != "$instVersMetern" ]; then
 	chown -R nginx:www-data /var/www/metern
 
 	if [[ $? -ne 0 ]] ; then
-    	logError "Error during meterN update. Exiting."
-   		logTitle "Update checking done"
-    	exit 1
-    else
-    	logNormal "meterN updated successfully"
+		logError "Error during meterN update. Exiting."
+		logTitle "Update checking done"
+		exit 1
+	else
+		logNormal "meterN updated successfully"
 	fi
 fi
 
