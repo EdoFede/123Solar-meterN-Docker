@@ -102,7 +102,7 @@ RUN sed -i \
 		/etc/php7/php-fpm.conf && \
 	
 	sed -i \
-		-e "s/listen = 127.0.0.1:9000/listen = \/run\/php\/php7.0-fpm.sock/" \
+		-e "s/listen = 127.0.0.1:9000/listen = \\/run\\/php\\/php7.0-fpm.sock/" \
 		-e 's/;listen.owner = nobody/listen.owner = nobody/' \
 		-e 's/;listen.group = nobody/listen.group = www-data/' \
 		-e 's/user = nobody/user = nginx/' \
@@ -135,6 +135,7 @@ RUN	mkdir -p /var/www/comapps && \
 	cp -f /tmp/tools/updateComapps.sh /var/www/scripts/ &&\
 	rm -rf /tmp/tools/ && \
 	chmod 755 /var/www/scripts/update123solarAndMetern.sh && \
+	chmod 755 /var/www/scripts/updateComapps.sh && \
 	chmod 4711 /usr/local/bin/sdm120c && \
 	ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/ && \
 
