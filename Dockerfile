@@ -24,7 +24,6 @@ ARG ALPINE_BRANCH
 FROM alpine:$ALPINE_BRANCH
 
 STOPSIGNAL SIGCONT
-
 COPY --from=builder /build/SDM120C/sdm120c /usr/local/bin/
 
 # Install required software
