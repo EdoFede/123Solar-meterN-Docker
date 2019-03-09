@@ -23,6 +23,7 @@ I've finally wrote a guide to install this Docker image on a Synology NAS.
 * [123Solar and meterN on Synology NAS (English version)](https://edoardofederici.com/123solar-metern-synology-docker/)
 * [123Solar and meterN on Synology NAS (Italian version)](https://edoardofederici.com/123solar-metern-synology-docker-it/)
 
+
 ## Credits
 Both 123Solar and meterN apps are developed by Jean-Marc Louviaux and are based on Web interfaces with PHP and shell scripts backend.
 
@@ -35,7 +36,7 @@ Flavio has also published many very detailed and well done [guides](http://www.f
 ### Container creation
 You can simply create and run a Docker container from the [image on the Docker hub](https://hub.docker.com/r/edofede/123solar-metern) by running:
 
-```shell
+```bash
 SERVER_PORT=10080 && \
 USB_DEVICE=/dev/ttyUSB0
 docker create --name 123Solar-meterN \
@@ -55,12 +56,16 @@ Four volumes are created to persist configurations and datas of the apps, so you
 ### First access
 The web interfaces are available at these addresses:
 
+```
     http://<Docker host/IP>:<SERVER_PORT>/123solar/
     http://<Docker host/IP>:<SERVER_PORT>/metern/
+```
 For example (my case):
 
+```
     http://nas.local:10080/123solar/
     http://nas.local:10080/metern/
+```
 
 ### Administrator passwords
 The default admin accounts to access the administrator views are:
@@ -69,21 +74,29 @@ Password: admin
 
 You can change the password later by using this command:
 
-	docker exec -i -t 123Solar-meterN bash -c 'printf "admin:$(openssl passwd -crypt)\n" > /var/www/123solar/config/.htpasswd && cp /var/www/123solar/config/.htpasswd /var/www/metern/config/.htpasswd'
+```bash
+docker exec -i -t 123Solar-meterN bash -c 'printf "admin:$(openssl passwd -crypt)\n" > /var/www/123solar/config/.htpasswd && cp /var/www/123solar/config/.htpasswd /var/www/metern/config/.htpasswd'
+```
 
 ### meterN ModBus setup
 I've included a `config_daemon.php` template file (provided by [Flavio](http://www.flanesi.it/doku/doku.php?id=metern_mono_modbus#avvio_file_pooler485_per_lettura_consumi) that points to meter address 2.
 If your meter address, USB device address or communication speed are different, edit this line:
 
+```php
     exec("pooler485 2 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &");
+```
 by using this command while the container is running:
 
+```bash
     docker exec -i -t 123Solar-meterN nano /var/www/metern/config/config_daemon.php
+```
 (and restart the container after editing)
 
 If you have more than one meter on a single RS485 line, you can add the meter IDs, separated by commas, in the `config_daemon.php` file, as explained by Flavio in [his tutorial](http://www.flanesi.it/doku/doku.php?id=aggiunta_contatori#lettura_contatori), for example:
 
-    exec('pooler485 1,2,3 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &');
+```php
+exec('pooler485 1,2,3 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &');
+```
 
 ### Extra features
 I've developed and included a simple `reqLineValues.php` script, that can be used to graph also the mains line parameters (voltage, current, frequency and cosphi).
@@ -92,7 +105,9 @@ More infos later.
 ### Container shell access
 If you need to edit some file or configuration inside the container, you can simply access the shell using this command while the container is running:
 
-    docker exec -i -t 123Solar-meterN bash
+```bash
+docker exec -i -t 123Solar-meterN bash
+```
 
 ## Docker image details
 The image is based on Alpine linux for lightweight distribution and mainly consist of:

@@ -41,7 +41,7 @@ run:
 		$(DOCKER_IMAGE):$(DOCKER_TAG) &
 
 output:
-	@echo Docker Image: $(DOCKER_IMAGE):$(DOCKER_TAG)
+	@echo Docker Image: "$(DOCKER_IMAGE)":"$(DOCKER_TAG)"
 
 push:
 	git add .
@@ -50,6 +50,6 @@ push:
 
 push_tagged:
 	git add .
-	git commit -S -m $(COMMENT)
-	git tag -s -a -m $(COMMENT) $(VERSION)
-	git push origin $(VERSION)
+	git commit -S -m "$(COMMENT)"
+	git tag -s -a -m "$(COMMENT)" "$(VERSION)"
+	git push origin "$(VERSION)"
