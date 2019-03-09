@@ -1,7 +1,11 @@
 .git
+.gitignore
+.github
+.gitattributes
 .cache
-*.md
-!README*.md
+Makefile
 buildImage.sh
 buildLocal.sh
-
+VERSION
+*.md
+!README*.md

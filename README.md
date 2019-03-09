@@ -17,6 +17,12 @@ A self-configuring Docker image to run 123Solar and meterN energy metering and m
 ## Why this Docker image
 After many hours of work to run these apps on my NAS, using Docker, I've decided to develop a ready-to-go image, in order to simplify the installation process.
 
+## Run on Synology NAS
+I've finally wrote a guide to install this Docker image on a Synology NAS.
+
+* [123Solar and meterN on Synology NAS (English version)](https://edoardofederici.com/123solar-metern-synology-docker/)
+* [123Solar and meterN on Synology NAS (Italian version)](https://edoardofederici.com/123solar-metern-synology-docker-it/)
+
 ## Credits
 Both 123Solar and meterN apps are developed by Jean-Marc Louviaux and are based on Web interfaces with PHP and shell scripts backend.
 
@@ -29,16 +35,18 @@ Flavio has also published many very detailed and well done [guides](http://www.f
 ### Container creation
 You can simply create and run a Docker container from the [image on the Docker hub](https://hub.docker.com/r/edofede/123solar-metern) by running:
 
-    SERVER_PORT=10080 && \
-    USB_DEVICE=/dev/ttyUSB0
-    docker create --name 123Solar-meterN \
-    	--device=$USB_DEVICE:rwm \
-    	--volume 123solar_config:/var/www/123solar/config \
-    	--volume 123solar_data:/var/www/123solar/data \
-    	--volume metern_config:/var/www/metern/config \
-    	--volume metern_data:/var/www/metern/data \
-    	-p $SERVER_PORT:80 \
-    	edofede/123solar-metern:latest
+```shell
+SERVER_PORT=10080 && \
+USB_DEVICE=/dev/ttyUSB0
+docker create --name 123Solar-meterN \
+	--device=$USB_DEVICE:rwm \
+	--volume 123solar_config:/var/www/123solar/config \
+	--volume 123solar_data:/var/www/123solar/data \
+	--volume metern_config:/var/www/metern/config \
+	--volume metern_data:/var/www/metern/data \
+	-p $SERVER_PORT:80 \
+	edofede/123solar-metern:latest
+```
 
 By changing `SERVER_PORT` you tells on which TCP port of your Docker host the web server should listen.
 The `USB_DEVICE` variable is the address of the USB>RS485 interface that is used to communicate with inverters and meters.
@@ -97,4 +105,3 @@ All components are automatically configured by the Docker image
  
 ## Limitation & future enhancement
 At the moment, the image supports only one USB>RS485 communication interface, so you must have all inverters and meters on the same RS485 bus.
-I plan to create a complete guide to run this Docker image on Synology NAS on [my site](http://edoardofederici.com).
