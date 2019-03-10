@@ -2,7 +2,7 @@
 # hooks/build
 # https://docs.docker.com/docker-cloud/builds/advanced/
 
-echo "[***] Build hook running"
+echo "### Custom build hook running... ###"
 
 ALPINE_BRANCH=3.9
 

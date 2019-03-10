@@ -1,4 +1,4 @@
-default: docker_build
+default: list
 
 ALPINE_BRANCH ?= 3.9
 DOCKER_IMAGE ?= edofede/123solar-metern
@@ -11,6 +11,10 @@ GIT_URL = $(shell git config --get remote.origin.url)
 
 SERVER_PORT ?= 10080
 USB_DEVICE ?= /dev/ttyUSB0
+
+list:
+	@printf "Targets:\\n"
+	@grep '^[^#[:space:]].*:' Makefile |cut -d ':' -f1 |sed -n '1!p'
 
 build:
 	@docker build \
