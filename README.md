@@ -4,11 +4,11 @@ A self-configuring Docker image to run 123Solar and meterN energy metering and m
 [![](https://images.microbadger.com/badges/image/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own image badge on microbadger.com")
 [![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own version badge on microbadger.com")
 ![](https://img.shields.io/github/last-commit/edofede/123solar-metern.svg)
-![](https://img.shields.io/github/license/EdoFede/123Solar-meterN.svg)
-
+![](https://img.shields.io/github/license/EdoFede/123Solar-meterN.svg)  
 ![](https://img.shields.io/docker/pulls/edofede/123solar-metern.svg)
 ![](https://img.shields.io/docker/cloud/automated/edofede/123solar-metern.svg)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4617241ea4b540f7adf243e1e76ea911)](https://www.codacy.com/app/EdoFede/123Solar-meterN?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EdoFede/123Solar-meterN&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4617241ea4b540f7adf243e1e76ea911)](https://www.codacy.com/app/EdoFede/123Solar-meterN?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EdoFede/123Solar-meterN&amp;utm_campaign=Badge_Grade)  
+![](https://img.shields.io/badge/If%20you%20can%20read%20this-you%20don't%20need%20glasses-green.svg)
 
 ## Introduction
 [123Solar](https://www.123solar.org) is a logger app for photovoltaic inverter(s)
@@ -22,7 +22,6 @@ I've finally wrote a guide to install this Docker image on a Synology NAS.
 
 * [123Solar and meterN on Synology NAS (English version)](https://edoardofederici.com/123solar-metern-synology-docker/)
 * [123Solar and meterN on Synology NAS (Italian version)](https://edoardofederici.com/123solar-metern-synology-docker-it/)
-
 
 ## Credits
 Both 123Solar and meterN apps are developed by Jean-Marc Louviaux and are based on Web interfaces with PHP and shell scripts backend.
@@ -56,15 +55,15 @@ Four volumes are created to persist configurations and datas of the apps, so you
 ### First access
 The web interfaces are available at these addresses:
 
-```
-    http://<Docker host/IP>:<SERVER_PORT>/123solar/
-    http://<Docker host/IP>:<SERVER_PORT>/metern/
+```http
+http://<Docker host/IP>:<SERVER_PORT>/123solar/
+http://<Docker host/IP>:<SERVER_PORT>/metern/
 ```
 For example (my case):
 
-```
-    http://nas.local:10080/123solar/
-    http://nas.local:10080/metern/
+```http
+http://nas.local:10080/123solar/
+http://nas.local:10080/metern/
 ```
 
 ### Administrator passwords
@@ -83,12 +82,12 @@ I've included a `config_daemon.php` template file (provided by [Flavio](http://w
 If your meter address, USB device address or communication speed are different, edit this line:
 
 ```php
-    exec("pooler485 2 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &");
+exec("pooler485 2 9600 /dev/ttyUSB0 > /dev/null 2>/dev/null &");
 ```
 by using this command while the container is running:
 
 ```bash
-    docker exec -i -t 123Solar-meterN nano /var/www/metern/config/config_daemon.php
+docker exec -i -t 123Solar-meterN nano /var/www/metern/config/config_daemon.php
 ```
 (and restart the container after editing)
 

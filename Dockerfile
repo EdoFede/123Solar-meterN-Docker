@@ -57,18 +57,18 @@ RUN	apk update && \
 		libmodbus-doc && \
 	rm -rf /var/cache/apk/* && \
 	# Remove testing repository
-	sed -i '$ d' /etc/apk/repositories && \
+	sed -i "$ d" /etc/apk/repositories && \
 
 	# Set local timezone
 	cp /usr/share/zoneinfo/Europe/Rome /etc/localtime
 
 # Setup base system and services
-RUN sed -i \
-		-e 's/#rc_sys=".*"/rc_sys="docker"/g' \
-		-e 's/#rc_env_allow=".*"/rc_env_allow="\*"/g' \
-		-e 's/#rc_crashed_stop=.*/rc_crashed_stop=NO/g' \
-		-e 's/#rc_crashed_start=.*/rc_crashed_start=YES/g' \
-		-e 's/#rc_provide=".*"/rc_provide="loopback net"/g' \
+RUN sed - \
+		-e "s/#rc_sys=\".*\"/rc_sys=\"docker\"/g" \
+		-e "s/#rc_env_allow=\".*\"/rc_env_allow=\"\*\"/g" \
+		-e "s/#rc_crashed_stop=.*/rc_crashed_stop=NO/g" \
+		-e "s/#rc_crashed_start=.*/rc_crashed_start=YES/g" \
+		-e "s/#rc_provide=\".*\"/rc_provide=\"loopback net\"/g" \
 		/etc/rc.conf && \
 	
 	rm 	/etc/init.d/hwdrivers \
@@ -76,14 +76,14 @@ RUN sed -i \
 		/etc/init.d/modules \
 		/etc/init.d/modloop && \
 	
-	sed -i 's/\tcgroup_add_service/\t#cgroup_add_service/g' /lib/rc/sh/openrc-run.sh && \
-	sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh && \
+	sed -i "s/\tcgroup_add_service/\t#cgroup_add_service/g" /lib/rc/sh/openrc-run.sh && \
+	sed -i "s/VSERVER/DOCKER/Ig" /lib/rc/sh/init.sh && \
 
-	sed -i 's/^\(tty\d\:\:\)/#\1/g' /etc/inittab && \
+	sed -i "s/^\(tty\d\:\:\)/#\1/g" /etc/inittab && \
 	mkdir -p /etc/runit/1.d && \
 	printf "#!/usr/bin/env sh\\nset -eu\\n\\nchmod 100 /etc/runit/stopit\\n\\n/var/www/scripts/update123solarAndMetern.sh || true\\n/bin/run-parts --exit-on-error /etc/runit/1.d || exit 100\\n" > /etc/runit/1 && \
-	printf "#!/usr/bin/env sh\\nset -eu\\n\\n/usr/local/bin/start_pooling.sh\\nrunsvdir -P /etc/service 'log: .....'\\n" > /etc/runit/2 && \
-	printf "#!/usr/bin/env sh\\nset -eu\\nexec 2>&1\\n\\necho 'Stopping services...'\\nsv -w196 force-stop /etc/service/*\\nsv exit /etc/service/*\\n\\n# kill running processes\\nfor PID in \$(ps -eo "pid,stat" |grep 'Z' |tr -d ' ' |sed 's/.$//' |sed '1d'); do\\n    timeout -t 5 /bin/sh -c \"kill \$PID && wait \$PID || kill -9 \$PID\"\\ndone\\n" > /etc/runit/3 && \
+	printf "#!/usr/bin/env sh\\nset -eu\\n\\n/usr/local/bin/start_pooling.sh\\nrunsvdir -P /etc/service \"log: .....\"\\n" > /etc/runit/2 && \
+	printf "#!/usr/bin/env sh\\nset -eu\\nexec 2>&1\\n\\necho \"Stopping services...\"\\nsv -w196 force-stop /etc/service/*\\nsv exit /etc/service/*\\n\\n# kill running processes\\nfor PID in \$(ps -eo \"pid,stat\" |grep \"Z\" |tr -d \" \" |sed \"s/.$//\" |sed \"1d\"); do\\n    timeout -t 5 /bin/sh -c \"kill \$PID && wait \$PID || kill -9 \$PID\"\\ndone\\n" > /etc/runit/3 && \
 	chmod 755 /etc/runit/1 /etc/runit/2 /etc/runit/3 && \
 	touch /etc/runit/reboot && \
 	touch /etc/runit/stopit && \
@@ -97,17 +97,17 @@ RUN sed -i \
 	chgrp -R www-data /run/php && \
 	sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php7/php.ini && \
 	sed -i \
-		-e 's/;daemonize\s*=\s*yes/daemonize = no/g' \
-		-e 's/;log_level = notice/log_level = warning/' \
+		-e "s/;daemonize\s*=\s*yes/daemonize = no/g" \
+		-e "s/;log_level = notice/log_level = warning/" \
 		/etc/php7/php-fpm.conf && \
 	
 	sed -i \
 		-e "s/listen = 127.0.0.1:9000/listen = \\/run\\/php\\/php7.0-fpm.sock/" \
-		-e 's/;listen.owner = nobody/listen.owner = nobody/' \
-		-e 's/;listen.group = nobody/listen.group = www-data/' \
-		-e 's/user = nobody/user = nginx/' \
-		-e 's/group = nobody/group = www-data/' \
-		-e 's/;clear_env = no/clear_env = no/' \
+		-e "s/;listen.owner = nobody/listen.owner = nobody/" \
+		-e "s/;listen.group = nobody/listen.group = www-data/" \
+		-e "s/user = nobody/user = nginx/" \
+		-e "s/group = nobody/group = www-data/" \
+		-e "s/;clear_env = no/clear_env = no/" \
 		/etc/php7/php-fpm.d/www.conf && \
 
 	# Configure nginx service
