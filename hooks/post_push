@@ -4,5 +4,8 @@
 
 echo "### Tagging the build to \"latest\"... ###"
 
-docker tag $IMAGE_NAME $DOCKER_REPO:latest
-docker push $DOCKER_REPO:latest
+# Avoid "latest" tagging if master branch is pushed 
+if [ "$SOURCE_BRANCH" != "master" ]; then
+	docker tag $IMAGE_NAME $DOCKER_REPO:latest
+	docker push $DOCKER_REPO:latest
+fi
