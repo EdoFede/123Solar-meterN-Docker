@@ -1,0 +1,8 @@
+#!/bin/bash
+# hooks/post_push
+# https://docs.docker.com/docker-cloud/builds/advanced/
+
+echo "### Tagging the build to \"latest\"... ###"
+
+docker tag $IMAGE_NAME $DOCKER_REPO:latest
+docker push $DOCKER_REPO:latest

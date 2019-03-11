@@ -47,13 +47,13 @@ run:
 output:
 	@echo Docker Image: "$(DOCKER_IMAGE)":"$(DOCKER_TAG)"
 
-push:
+commit:
 	git add .
 	git commit -S -m "$(COMMENT)"
-	git push
+
+push_master:
+	git push origin
 
 push_tagged:
-	git add .
-	git commit -S -m "$(COMMENT)"
 	git tag -s -a -m "$(COMMENT)" "$(VERSION)"
 	git push origin "$(VERSION)"
