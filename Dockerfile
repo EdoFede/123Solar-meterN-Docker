@@ -129,6 +129,7 @@ RUN	mkdir -p /var/www/comapps && \
 	cp -f /tmp/tools/reqLineValues.php /var/www/comapps/ && \
 	cp -f /tmp/tools/update123solarAndMetern.sh /var/www/scripts/ &&\
 	cp -f /tmp/tools/updateComapps.sh /var/www/scripts/ &&\
+	cp -f /tmp/tools/index.html /var/www/ &&\
 	rm -rf /tmp/tools/ && \
 	chmod 755 /var/www/scripts/update123solarAndMetern.sh && \
 	chmod 755 /var/www/scripts/updateComapps.sh && \
