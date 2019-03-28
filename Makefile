@@ -15,7 +15,7 @@ SERVER_PORT ?= 10080
 USB_DEVICE ?= /dev/ttyUSB0
 
 
-.PHONY: list git_push output build debug run test test_all clean docker_push docker_push_latest
+.PHONY: list git_push git_fix_permission output build debug run test test_all clean docker_push docker_push_latest
 
 
 list:
@@ -23,6 +23,7 @@ list:
 	@cat Makefile |sed '1d' |cut -d ' ' -f1 |grep : |grep -v -e '\t' -e '\.' |cut -d ':' -f1
 	@printf "\\n# Syntax: \\n"
 	@printf "\\tmake git_push \\ \\n\\t\\tCOMMENT=\"<commit description>\" \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: \`git branch |grep \* |cut -d ' ' -f2\`)]\\n"
+	@printf "\\tmake git_fix_permission \\n"
 	@printf "\\tmake output \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: \`git branch |grep \* |cut -d ' ' -f2\`)] \\n"
 	@printf "\\tmake build \\ \\n\\t\\t[BRANCH=<Git destination branch> (default: \`git branch |grep \* |cut -d ' ' -f2\`)] \\ \\n\\t\\t[ARCHS=<List of architectures to build> (default: amd64 arm32v6 arm32v7 i386 ppc64le)] \\ \\n\\t\\t[ALPINE_BRANCH=<Alpine linux version> (default: 3.9.2)] \\ \\n\\t\\t[GIT_COMMIT=<Git commit sha> (default: git rev-parse --short HEAD)] \\ \\n\\t\\t[GITHUB_TOKEN=<Github auth token for API>] \\n"
 	@printf "\\tmake run \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: \`git branch |grep \* |cut -d ' ' -f2\`)] \\n"
@@ -42,6 +43,12 @@ else
 	@git commit -S -m "$(COMMENT)"
 	@git push origin $(BRANCH)
 endif
+
+
+git_fix_permission:
+	@find . -type f ! -path '*/.git/*' ! -name '.DS_Store' -exec xattr -c {} \;
+	@find . -type f ! -path '*/.git/*' ! -name '.DS_Store' ! -path '*/build_tmp/*' -perm +111 -exec git update-index --chmod=+x {} \;
+	@find . -type f ! -path '*/.git/*' ! -name '.DS_Store' ! -path '*/build_tmp/*' ! -perm +111 -exec git update-index --chmod=-x {} \;
 
 
 output:
