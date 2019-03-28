@@ -1,11 +1,11 @@
-ARG BASEIMAGE_BRANCH
 ARG ARCH
-FROM $ARCH/alpine:3.9.2 as builder
+ARG BASEIMAGE_BRANCH
+FROM $ARCH/alpine:3.9 as builder
 
 # Install build tools
-#RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-RUN	apk update
-RUN	apk --no-cache add \
+RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
+	apk update && \
+	apk --no-cache add \
 		libmodbus-dev \
 		ca-certificates \
 		make \

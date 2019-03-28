@@ -9,7 +9,7 @@ install:
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 script: 
-  - make build BRANCH=$TRAVIS_BRANCH GIT_COMMIT=$TRAVIS_COMMIT GITHUB_TOKEN=$GITHUB_TOKEN
+  - make build BRANCH=$TRAVIS_BRANCH GIT_COMMIT=$(git rev-parse --short $TRAVIS_COMMIT) GITHUB_TOKEN=$GITHUB_TOKEN
   - make test_all BRANCH=$TRAVIS_BRANCH
 
 after_script: docker images
