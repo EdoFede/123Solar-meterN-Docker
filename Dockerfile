@@ -3,6 +3,7 @@ ARG BASEIMAGE_BRANCH
 FROM $ARCH/alpine:3.9 as builder
 
 # Install build tools
+RUN apk update
 RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
 	apk update && \
 	apk --no-cache add \
