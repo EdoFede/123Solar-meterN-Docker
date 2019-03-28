@@ -3,9 +3,9 @@ ARG ARCH
 FROM $ARCH/alpine:3.9.2 as builder
 
 # Install build tools
-RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
-	apk update && \
-	apk --no-cache add \
+RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories
+RUN	apk update
+RUN	apk --no-cache add \
 		libmodbus-dev \
 		ca-certificates \
 		make \
