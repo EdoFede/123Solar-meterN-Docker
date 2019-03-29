@@ -2,13 +2,13 @@
 A self-configuring Docker image to run 123Solar and meterN energy metering and monitoring.
 
 [![](https://images.microbadger.com/badges/image/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own image badge on microbadger.com")
-[![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own version badge on microbadger.com")
-![](https://img.shields.io/github/last-commit/edofede/123solar-metern.svg)
-![](https://img.shields.io/github/license/EdoFede/123Solar-meterN.svg)  
-![](https://img.shields.io/docker/pulls/edofede/123solar-metern.svg)
-![](https://img.shields.io/docker/cloud/automated/edofede/123solar-metern.svg)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4617241ea4b540f7adf243e1e76ea911)](https://www.codacy.com/app/EdoFede/123Solar-meterN?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EdoFede/123Solar-meterN&amp;utm_campaign=Badge_Grade)  
-![](https://img.shields.io/badge/If%20you%20can%20read%20this-you%20don't%20need%20glasses-green.svg)
+[![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://github.com/EdoFede/123Solar-meterN-Docker/releases)
+[![](https://img.shields.io/docker/pulls/edofede/123solar-metern.svg)](https://hub.docker.com/r/edofede/123solar-metern)  
+[![](https://img.shields.io/github/last-commit/EdoFede/123Solar-meterN-Docker.svg)](https://github.com/EdoFede/123Solar-meterN-Docker/commits/master)
+[![Build Status](https://travis-ci.com/EdoFede/123Solar-meterN-Docker.svg?branch=master)](https://travis-ci.com/EdoFede/123Solar-meterN-Docker)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/e800c6daf6374b9f9c7d24c9e3a316e6)](https://www.codacy.com/app/EdoFede/123Solar-meterN-Docker?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=EdoFede/123Solar-meterN-Docker&amp;utm_campaign=Badge_Grade)  
+[![](https://img.shields.io/github/license/EdoFede/123Solar-meterN-Docker.svg)](https://github.com/EdoFede/123Solar-meterN-Docker/blob/master/LICENSE)
+[![](https://img.shields.io/badge/If%20you%20can%20read%20this-you%20don't%20need%20glasses-brightgreen.svg)](https://shields.io)
 
 ## Introduction
 [123Solar](https://www.123solar.org) is a logger app for photovoltaic inverter(s)
@@ -119,3 +119,9 @@ All components are automatically configured by the Docker image
  
 ## Limitation & future enhancement
 At the moment, the image supports only one USB>RS485 communication interface, so you must have all inverters and meters on the same RS485 bus.
+
+## Support me
+I treat these free projects exactly like professional works and I'm glad to share it, with some of my knowledge, for free.
+
+If you found my work useful and want to support me, you can donate me a little amount  
+[![Donate](https://img.shields.io/badge/Donate-Paypal-2997D8.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=JA8LPLG38EVK2&source=url)
