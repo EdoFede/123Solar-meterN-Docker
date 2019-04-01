@@ -64,7 +64,7 @@ done
 logSubTitle "Checking response from web server (HTML Static content)"
 testPageResult=$(curl -sS http://localhost:$webPort/testPage.html)
 expectedResult="<html><head><title>nginx-php-fpm test page</title></head></html>"
-if [ -z $testPageResult ]; then
+if [ -z "$testPageResult" ]; then
 	logError "Error: no output from the webserver"
 	logError "Aborting..."
 	cleanup
@@ -84,7 +84,7 @@ logNormal "[OK] Test passed"
 logSubTitle "Checking response from web server (PHP Dynamic content)"
 testPageResult=$(curl -sS http://localhost:$webPort/testPage.php)
 expectedResult="<html><head><title>nginx-php-fpm PHP test page</title></head></html>"
-if [ -z $testPageResult ]; then
+if [ -z "$testPageResult" ]; then
 	logError "Error: no output from the webserver"
 	logError "Aborting..."
 	cleanup
