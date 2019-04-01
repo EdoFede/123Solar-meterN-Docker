@@ -133,7 +133,7 @@ cmdBuilt+=" ."
 eval $cmdBuilt
 if [ $? != 0 ]; then
 	logError "Build failed"
-	# cleanup
+	cleanup
 	exit 3
 fi
 
