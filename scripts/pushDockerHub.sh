@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 source scripts/multiArchMatrix.sh
 source scripts/logger.sh
@@ -53,6 +52,10 @@ echo ""
 logTitle "Start pushing images"
 for i in ${!ARCHS[@]}; do
 	docker push $DOCKER_IMAGE:$DOCKER_TAG-${ARCHS[i]}
+	if [ $? != 0 ]; then
+		logError "Error pushing $DOCKER_IMAGE:$DOCKER_TAG-${ARCHS[i]}"
+		exit 2
+	fi
 done
 logNormal "Done"
 
@@ -64,6 +67,11 @@ for i in ${!ARCHS[@]}; do
 	cmdCreate+="$DOCKER_IMAGE:$DOCKER_TAG-${ARCHS[i]} "
 done
 eval $cmdCreate
+if [ $? != 0 ]; then
+	logError "Error creating manifest $DOCKER_IMAGE:$DOCKER_TAG"
+	exit 2
+fi
+
 # Annotate manifest
 for i in ${!ARCHS[@]}; do
 	cmdAnnotate="docker manifest annotate $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:$DOCKER_TAG-${ARCHS[i]}"
@@ -73,9 +81,17 @@ for i in ${!ARCHS[@]}; do
 		cmdAnnotate+=" --variant ${ARCH_VARIANTS[i]}"
 	fi
 	eval $cmdAnnotate
+	if [ $? != 0 ]; then
+		logError "Error annotating manifest $DOCKER_IMAGE:$DOCKER_TAG-${ARCHS[i]}"
+		exit 2
+	fi
 done
 # Push manifest to Docker HUB
 docker manifest push --purge $DOCKER_IMAGE:$DOCKER_TAG
+if [ $? != 0 ]; then
+	logError "Error pushing manifest $DOCKER_IMAGE:$DOCKER_TAG"
+	exit 2
+fi
 logNormal "Done"
 
 ### Latest tag ###
@@ -97,8 +113,16 @@ if [ $TAG_LATEST == 1 ] ; then
 			cmdAnnotate+=" --variant ${ARCH_VARIANTS[i]}"
 		fi
 		eval $cmdAnnotate
+		if [ $? != 0 ]; then
+			logError "Error annotating manifest $DOCKER_IMAGE:$DOCKER_TAG-${ARCHS[i]}"
+			exit 2
+		fi
 	done
 	# Push latest manifest to Docker HUB
 	docker manifest push --purge $DOCKER_IMAGE:latest
+	if [ $? != 0 ]; then
+		logError "Error pushing manifest $DOCKER_IMAGE:latest"
+		exit 2
+	fi
 	logNormal "Done"
 fi

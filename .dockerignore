@@ -1,5 +1,6 @@
 *
 !README*.md
+!build_tmp/*
 !imageFiles/*
 
 ######################

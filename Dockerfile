@@ -1,6 +1,9 @@
 ARG ARCH
 ARG BASEIMAGE_BRANCH
-FROM $ARCH/alpine:3.9 as builder
+FROM $ARCH/alpine:3.9.2 as builder
+
+# Copy QEMU binary for multiarch builds
+COPY build_tmp/qemu/ /usr/bin/
 
 # Install build tools
 RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
