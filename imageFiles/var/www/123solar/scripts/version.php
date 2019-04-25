@@ -1,1 +1,1 @@
-$VERSION='123Solar 1.0';
+$VERSION='123Solar 0.0';

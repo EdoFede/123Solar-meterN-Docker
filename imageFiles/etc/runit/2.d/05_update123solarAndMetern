@@ -1,0 +1,4 @@
+#!/bin/bash
+
+logger -t "2.d update123solarAndMetern" "Check and update 123Solar and meterN"
+/var/www/scripts/update123solarAndMetern.sh

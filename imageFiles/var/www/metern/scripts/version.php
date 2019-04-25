@@ -1,1 +1,1 @@
-$VERSION='meterN 0.0.1';
+$VERSION='meterN 0.0';

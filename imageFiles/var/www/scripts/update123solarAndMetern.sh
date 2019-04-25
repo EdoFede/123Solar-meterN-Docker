@@ -56,11 +56,13 @@ if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	fi
 
 	# Do not overwrite config and data directories
-	if [ -d /var/www/123solar/config ]; then
-		rm -rf 123solar/config/
-	fi
-	if [ -d /var/www/123solar/data ]; then
-		rm -rf 123solar/data/
+	if [ "$instVers123sol" != "0.0" ]; then
+		if [ -d /var/www/123solar/config ]; then
+			rm -rf 123solar/config/
+		fi
+		if [ -d /var/www/123solar/data ]; then
+			rm -rf 123solar/data/
+		fi
 	fi
 
 	cp -Rf 123solar/* /var/www/123solar/ && \
@@ -93,11 +95,16 @@ if [ "$lastVersMetern" != "$instVersMetern" ]; then
 	fi
 
 	# Do not overwrite config and data directories
-	if [ -d /var/www/metern/config ]; then
-		rm -rf metern/config/
-	fi
-	if [ -d /var/www/metern/data ]; then
-		rm -rf metern/data/
+	if [ "$instVersMetern" != "0.0" ]; then
+		if [ -d /var/www/metern/config ]; then
+			rm -rf metern/config/
+		fi
+		if [ -d /var/www/metern/data ]; then
+			rm -rf metern/data/
+		fi
+	else
+		# On first copy, keep the config_daemon.php supplied with this image
+		rm metern/config/config_daemon.php
 	fi
 
 	cp -Rf metern/* /var/www/metern/ && \

@@ -78,9 +78,6 @@ RUN sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php7/php.ini && \
 	ln -s /var/www/comapps/reqsdm.php /usr/local/bin/reqsdm && \
 	ln -s /var/www/comapps/testcom.php /usr/local/bin/testcom
 
-# Re-copy my meterN deamon example file
-COPY imageFiles/var/www/metern/config/config_daemon.php /var/www/metern/config
-
 ARG VERSION
 ARG BUILD_DATE
 ARG VCS_REF
