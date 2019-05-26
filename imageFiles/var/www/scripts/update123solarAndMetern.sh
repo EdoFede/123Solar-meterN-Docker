@@ -40,6 +40,19 @@ if [ "$lastVers123sol" == "$instVers123sol" ] && [ "$lastVersMetern" == "$instVe
 	exit 0
 fi
 
+logSubTitle "Updating system components (wget and ca-certificates)..."
+apk update && \
+apk --no-cache add \
+	ca-certificates \
+	wget && \
+update-ca-certificates
+if [[ $? -ne 0 ]] ; then
+	logError "Error during system components update."
+else
+	logNormal "System components updated successfully"
+fi
+
+
 if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	logSubTitle "[123Solar] Updating..."
 	
