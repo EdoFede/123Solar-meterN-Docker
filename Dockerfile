@@ -1,6 +1,6 @@
 ARG ARCH
 ARG BASEIMAGE_BRANCH
-FROM $ARCH/alpine:3.9.2 as builder
+FROM $ARCH/alpine:3.10.2 as builder
 
 # Copy QEMU binary for multiarch builds
 COPY build_tmp/qemu/ /usr/bin/
@@ -10,6 +10,7 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/re
 	apk update && \
 	apk --no-cache add \
 		libmodbus-dev \
+		linux-headers \
 		ca-certificates \
 		make \
 		file \
@@ -19,13 +20,22 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/re
 
 # Build sdm120c comm app
 RUN	mkdir /build && \
-	git clone https://github.com/gianfrdp/SDM120C /build && \
-	make -s -C /build/ clean && \
-	make -s -C /build/
+	mkdir /build/SDM120C && \
+	git clone https://github.com/gianfrdp/SDM120C /build/SDM120C && \
+	make -s -C /build/SDM120C/ clean && \
+	make -s -C /build/SDM120C/ && \
+# Build Aurora interface
+	wget http://www.curtronics.com/Solar/ftp/aurora-1.9.3.tar.gz -P /build/ && \
+	tar -xzvf /build/aurora*.tar.gz -C /build/ && \
+	rm /build/aurora*.tar.gz && \
+	mv /build/aurora* /build/aurora && \
+	ln -s /usr/include/linux/can/error.h /usr/include/error.h && \
+	make -s -C /build/aurora/ clean && \
+	make -s -C /build/aurora/
 
 FROM edofede/nginx-php-fpm:$BASEIMAGE_BRANCH-$ARCH
 
-COPY --from=builder /build/sdm120c /usr/local/bin/
+COPY --from=builder /build/SDM120C/sdm120c /build/aurora/aurora /usr/local/bin/
 
 # Install required software
 RUN	apk update && \
@@ -51,7 +61,7 @@ RUN sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php7/php.ini && \
 	adduser nginx uucp && \
 	chmod 755 /var/www/scripts/update123solarAndMetern.sh && \
 	chmod 755 /var/www/scripts/updateComapps.sh && \
-	chmod 4711 /usr/local/bin/sdm120c && \
+	chmod 4711 /usr/local/bin/sdm120c /usr/local/bin/aurora && \
 # Download and install 123Solar and meterN
 	/var/www/scripts/update123solarAndMetern.sh && \
 # Download and install common apps
