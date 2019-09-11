@@ -16,7 +16,8 @@ RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/re
 		file \
 		gcc \
 		g++ \
-		git
+		git \
+		wget
 
 # Build sdm120c comm app
 RUN	mkdir /build && \
@@ -35,7 +36,10 @@ RUN	mkdir /build && \
 
 FROM edofede/nginx-php-fpm:$BASEIMAGE_BRANCH-$ARCH
 
-COPY --from=builder /build/SDM120C/sdm120c /build/aurora/aurora /usr/local/bin/
+COPY --from=builder \
+	/build/SDM120C/sdm120c \
+	/build/aurora/aurora \
+	/usr/local/bin/
 
 # Install required software
 RUN	apk update && \
