@@ -3,7 +3,7 @@ default: list
 DOCKER_IMAGE ?= edofede/123solar-metern
 
 ARCHS ?= amd64 arm32v6 arm32v7 i386 ppc64le
-BASEIMAGE_BRANCH ?= 1.4
+BASEIMAGE_BRANCH ?= 1.5
 
 GITHUB_TOKEN ?= "NONE"
 
