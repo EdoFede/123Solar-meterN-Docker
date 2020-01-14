@@ -80,7 +80,7 @@ else
 fi
 
 if [ -z QEMU_RELEASE ]; then
-	QEMU_RELEASE="v3.0.0"
+	QEMU_RELEASE="v4.2.0-2"
 fi
 
 for i in ${!ARCHS[@]}; do
