@@ -1,5 +1,5 @@
 # Docker image for 123Solar and meterN
-A self-configuring Docker image to run 123Solar and meterN energy metering and monitoring.
+A self-configuring multi-arch Docker image to run 123Solar and meterN energy metering and monitoring.
 
 [![](https://images.microbadger.com/badges/image/edofede/123solar-metern.svg)](https://microbadger.com/images/edofede/123solar-metern "Get your own image badge on microbadger.com")
 [![](https://images.microbadger.com/badges/version/edofede/123solar-metern.svg)](https://github.com/EdoFede/123Solar-meterN-Docker/releases)

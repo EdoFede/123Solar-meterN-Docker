@@ -1,22 +1,25 @@
 default: list
 
-DOCKER_IMAGE ?= edofede/123solar-metern
+IMAGE_NAME = 123solar-metern
+DOCKER_HUB_REPO = edofede
+DOCKER_LOCAL_REPO = localhost:5000
+
+DOCKER_IMAGE ?= $(DOCKER_HUB_REPO)/$(IMAGE_NAME)
+DOCKER_TEST_IMAGE = $(DOCKER_LOCAL_REPO)/$(IMAGE_NAME)
 
 ARCHS ?= amd64 arm32v6 arm32v7 arm64v8 i386 ppc64le
-BASEIMAGE_BRANCH ?= 1.6
+PLATFORM ?= amd64
+BASEIMAGE_BRANCH ?= 1.7
 
 GITHUB_TOKEN ?= "NONE"
 
-ARCH ?= amd64
 BRANCH ?= $(shell git branch |grep \* |cut -d ' ' -f2)
+TAG_LATEST ?= 0
 DOCKER_TAG = $(shell echo $(BRANCH) |sed 's/^v//')
 GIT_COMMIT ?= $(strip $(shell git rev-parse --short HEAD))
 
-SERVER_PORT ?= 10080
-USB_DEVICE ?= /dev/ttyUSB0
 
-
-.PHONY: list git_push git_fix_permission output build debug run test test_all clean docker_push docker_push_latest
+.PHONY: list git_push git_fix_permission output build build_push debug run test test_all clean
 
 
 list:
@@ -26,14 +29,13 @@ list:
 	@printf "\\tmake git_push \\ \\n\\t\\tCOMMENT=\"<Commit description>\" \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)]\\n"
 	@printf "\\tmake git_fix_permission \\n"
 	@printf "\\tmake output \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\n"
-	@printf "\\tmake build \\ \\n\\t\\t[BRANCH=<Git destination branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCHS=<List of architectures to build> (default: $(ARCHS))] \\ \\n\\t\\t[BASEIMAGE_BRANCH=<Baseimage version> (default: $(BASEIMAGE_BRANCH))] \\ \\n\\t\\t[GIT_COMMIT=<Git commit sha> (default: git rev-parse --short HEAD)] \\ \\n\\t\\t[GITHUB_TOKEN=<Github auth token for API>] \\n"
-	@printf "\\tmake run \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCH=<Architecture> (default: $(ARCH))] \\n"
-	@printf "\\tmake debug \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCH=<Architecture> (default: $(ARCH))] \\n"
-	@printf "\\tmake test \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCH=<Architecture> (default: $(ARCH))] \\n"
-	@printf "\\tmake test_all \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCHS=<List of architectures to test> (default: $(ARCHS))] \\n"
+	@printf "\\tmake build \\ \\n\\t\\t[BRANCH=<Git destination branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCH=<Architecture to build> (no option = all architectures)] \\ \\n\\t\\t[BASEIMAGE_BRANCH=<Baseimage version> (default: $(BASEIMAGE_BRANCH))] \\ \\n\\t\\t[GIT_COMMIT=<Git commit sha> (default: git rev-parse --short HEAD)] \\ \\n\\t\\t[GITHUB_TOKEN=<Github auth token for API>] \\n"
+	@printf "\\tmake build_push \\ \\n\\t\\t[BRANCH=<Git destination branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCH=<Architecture to build> (no option = all architectures)] \\ \\n\\t\\t[BASEIMAGE_BRANCH=<Baseimage version> (default: $(BASEIMAGE_BRANCH))] \\ \\n\\t\\t[GIT_COMMIT=<Git commit sha> (default: git rev-parse --short HEAD)] \\ \\n\\t\\t[GITHUB_TOKEN=<Github auth token for API>] \\n"
+	@printf "\\tmake run \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[PLATFORM=<Architecture> (Default: $(PLATFORM))] \\n"
+	@printf "\\tmake debug \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[PLATFORM=<Architecture> (Default: $(PLATFORM))] \\n"
+	@printf "\\tmake test \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[PLATFORM=<Architecture> (Default: $(PLATFORM))] \\n"
+	@printf "\\tmake test_all \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\ \\n\\t\\t[ARCH=<Architecture to test> (no option = all architectures)] \\n"
 	@printf "\\tmake clean \\n"
-	@printf "\\tmake docker_push \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\n"
-	@printf "\\tmake docker_push_latest \\ \\n\\t\\t[BRANCH=<GitHub branch> (default: `git branch |grep \* |cut -d ' ' -f2`)] \\n"
 
 
 git_push:
@@ -57,44 +59,65 @@ output:
 
 
 build:
-	@$(foreach ARCH,$(ARCHS), \
-		scripts/build.sh -i $(DOCKER_IMAGE) -t $(DOCKER_TAG) \
-			-a $(ARCH) \
-			-b $(BASEIMAGE_BRANCH) \
-			-v $(BRANCH) \
-			-r $(GIT_COMMIT) \
-			-g $(GITHUB_TOKEN) ;\
-	)
-	
+ifndef ARCH
+	@scripts/build.sh -i $(DOCKER_TEST_IMAGE) -t $(DOCKER_TAG) \
+		-b $(BASEIMAGE_BRANCH) \
+		-v $(BRANCH) \
+		-l $(TAG_LATEST) \
+		-r $(GIT_COMMIT) \
+		-g $(GITHUB_TOKEN) ;
+else
+	@scripts/build.sh -i $(DOCKER_TEST_IMAGE) -t $(DOCKER_TAG) \
+		-a $(ARCH) \
+		-b $(BASEIMAGE_BRANCH) \
+		-l $(TAG_LATEST) \
+		-v $(BRANCH) \
+		-r $(GIT_COMMIT) \
+		-g $(GITHUB_TOKEN) ;
+endif
+
+
+build_push:
+ifndef ARCH
+	@scripts/build.sh -i $(DOCKER_IMAGE) -t $(DOCKER_TAG) \
+		-b $(BASEIMAGE_BRANCH) \
+		-l $(TAG_LATEST) \
+		-v $(BRANCH) \
+		-r $(GIT_COMMIT) \
+		-g $(GITHUB_TOKEN) ;
+else
+	@scripts/build.sh -i $(DOCKER_IMAGE) -t $(DOCKER_TAG) \
+		-a $(ARCH) \
+		-b $(BASEIMAGE_BRANCH) \
+		-l $(TAG_LATEST) \
+		-v $(BRANCH) \
+		-r $(GIT_COMMIT) \
+		-g $(GITHUB_TOKEN) ;
+endif
 
 run:
-	@docker run --rm \
-		--volume 123solar_config:/var/www/123solar/config \
-		--volume 123solar_data:/var/www/123solar/data \
-		--volume metern_config:/var/www/metern/config \
-		--volume metern_data:/var/www/metern/data \
-		--publish-all \
-		$(DOCKER_IMAGE):$(DOCKER_TAG)-$(ARCH) &
+	@scripts/run.sh -i $(DOCKER_TEST_IMAGE) -t $(DOCKER_TAG) \
+		-p $(PLATFORM) \
+		-d 0
 
 
 debug:
-	@docker run --rm -ti \
-		--volume 123solar_config:/var/www/123solar/config \
-		--volume 123solar_data:/var/www/123solar/data \
-		--volume metern_config:/var/www/metern/config \
-		--volume metern_data:/var/www/metern/data \
-		$(DOCKER_IMAGE):$(DOCKER_TAG)-$(ARCH) \
-		/bin/bash
+	@scripts/run.sh -i $(DOCKER_TEST_IMAGE) -t $(DOCKER_TAG) \
+		-p $(PLATFORM) \
+		-d 1
 
 
 test:
-	@./scripts/testWebApps.sh $(DOCKER_TAG)-$(ARCH)
+	@scripts/test.sh \
+		-i $(DOCKER_TEST_IMAGE) \
+		-t $(DOCKER_TAG) \
+		-p $(PLATFORM)
 
 
 test_all:
-	@$(foreach ARCH,$(ARCHS), \
-		./scripts/testWebApps.sh $(DOCKER_TAG)-$(ARCH); \
-	)
+	@scripts/test.sh \
+		-i $(DOCKER_TEST_IMAGE) \
+		-t $(DOCKER_TAG)
 
 
 clean:
@@ -102,11 +125,3 @@ clean:
 	@docker rm $(shell docker ps -a -q `docker image ls -q $(DOCKER_IMAGE) |sed 's/.*/ --filter ancestor=&/'`) || exit 0
 	@docker image rm $(shell docker image ls -a -q $(DOCKER_IMAGE)) || exit 0
 	@docker image prune -f
-
-
-docker_push:
-	@./scripts/pushDockerHub.sh -i $(DOCKER_IMAGE) -t $(DOCKER_TAG)
-
-
-docker_push_latest:
-	@./scripts/pushDockerHub.sh -i $(DOCKER_IMAGE) -t $(DOCKER_TAG) -l

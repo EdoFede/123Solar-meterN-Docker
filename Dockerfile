@@ -1,9 +1,6 @@
-ARG ARCH
 ARG BASEIMAGE_BRANCH
-FROM $ARCH/alpine:3.10.2 as builder
 
-# Copy QEMU binary for multiarch builds
-COPY build_tmp/qemu/ /usr/bin/
+FROM alpine:latest as builder
 
 # Install build tools
 RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
@@ -34,7 +31,7 @@ RUN	mkdir /build && \
 	make -s -C /build/aurora/ clean && \
 	make -s -C /build/aurora/
 
-FROM edofede/nginx-php-fpm:$BASEIMAGE_BRANCH-$ARCH
+FROM edofede/nginx-php-fpm:$BASEIMAGE_BRANCH
 
 COPY --from=builder \
 	/build/SDM120C/sdm120c \
@@ -92,8 +89,8 @@ RUN sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php7/php.ini && \
 	ln -s /var/www/comapps/reqsdm.php /usr/local/bin/reqsdm && \
 	ln -s /var/www/comapps/testcom.php /usr/local/bin/testcom
 
-ARG VERSION
 ARG BUILD_DATE
+ARG VERSION
 ARG VCS_REF
 
 LABEL 	maintainer="Edoardo Federici <hello@edoardofederici.com>" \
@@ -101,7 +98,7 @@ LABEL 	maintainer="Edoardo Federici <hello@edoardofederici.com>" \
 		org.label-schema.vendor="Edoardo Federici" \
 		org.label-schema.url="https://edoardofederici.com/123solar-metern-synology-docker/" \
 		org.label-schema.name="123solar-metern" \
-		org.label-schema.description="Docker image for 123Solar and meterN web apps" \
+		org.label-schema.description="Docker multiarch image for 123Solar and meterN web apps" \
 		org.label-schema.version=$VERSION \
 		org.label-schema.build-date=$BUILD_DATE \
 		org.label-schema.vcs-url="https://github.com/EdoFede/123Solar-meterN" \
