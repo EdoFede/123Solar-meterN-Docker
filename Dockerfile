@@ -28,7 +28,9 @@ RUN	mkdir /build && \
 	rm /build/aurora*.tar.gz && \
 	mv /build/aurora* /build/aurora && \
 	ln -s /usr/include/linux/can/error.h /usr/include/error.h && \
+	sed -i "s/#ARCH = native/ARCH = NONE/" /build/aurora/Makefile && \
 	make -s -C /build/aurora/ clean && \
+	make -s -C /build/aurora/ check && \
 	make -s -C /build/aurora/
 
 FROM edofede/nginx-php-fpm:$BASEIMAGE_BRANCH
