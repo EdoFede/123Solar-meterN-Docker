@@ -19,7 +19,15 @@ function logError() {
 logTitle "Update checking started for 123Solar and meterN"
 
 rawLastVers123sol=$(curl -f -s https://123solar.org/latest_version.php)
+if [[ $? -ne 0 ]] ; then
+	logError "Error retrieving 123solar last version. Exiting."
+	exit 1
+fi
 rawLastVersMetern=$(curl -f -s https://metern.org/latest_version.php)
+if [[ $? -ne 0 ]] ; then
+	logError "Error retrieving 123solar last version. Exiting."
+	exit 1
+fi
 
 lastVers123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->LASTVERSION;' |cut -d ' ' -f2)
 lastVersMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->LASTVERSION;' |cut -d ' ' -f2)
