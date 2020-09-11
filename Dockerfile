@@ -3,22 +3,31 @@ ARG BASEIMAGE_BRANCH
 FROM alpine:latest as builder
 
 # Install build tools
-RUN printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
-	apk update && \
+RUN apk update && \
 	apk --no-cache add \
-		libmodbus-dev \
 		linux-headers \
 		ca-certificates \
 		make \
 		file \
+		automake \
+		autoconf \
+		pkgconf \
+		libtool \
 		gcc \
 		g++ \
 		git \
 		wget
-
+# Build libmodbus library
+RUN mkdir -p /build/libmodbus && \
+	git clone https://github.com/stephane/libmodbus /build/libmodbus && \
+	cd /build/libmodbus && \
+	./autogen.sh && \
+	./configure --prefix=/usr && \
+	make && \
+	make install && \
+	cd / && \
 # Build sdm120c comm app
-RUN	mkdir /build && \
-	mkdir /build/SDM120C && \
+	mkdir -p /build/SDM120C && \
 	git clone https://github.com/gianfrdp/SDM120C /build/SDM120C && \
 	make -s -C /build/SDM120C/ clean && \
 	make -s -C /build/SDM120C/ && \
@@ -40,19 +49,18 @@ COPY --from=builder \
 	/build/aurora/aurora \
 	/usr/local/bin/
 
+COPY --from=builder \
+	/usr/lib/libmodbus.la \
+	/usr/lib/libmodbus.so \
+	/usr/lib/libmodbus.so.5 \
+	/usr/lib/libmodbus.so.5.1.0 \
+	/usr/lib/
+
 # Install required software
 RUN	apk update && \
 	apk --no-cache add \
 		rrdtool && \
-# Add testing repository for libmodbus
-	printf "http://dl-cdn.alpinelinux.org/alpine/edge/testing\\n" >> /etc/apk/repositories && \
-	apk update && \
-	apk --no-cache add \
-		libmodbus \
-		libmodbus-doc && \
 	rm -rf /var/cache/apk/* && \
-# Remove testing repository
-	sed -i "$ d" /etc/apk/repositories && \
 # Set local timezone
 	cp /usr/share/zoneinfo/Europe/Rome /etc/localtime
 
