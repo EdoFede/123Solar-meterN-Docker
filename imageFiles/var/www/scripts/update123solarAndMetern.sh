@@ -18,12 +18,12 @@ function logError() {
 
 logTitle "Update checking started for 123Solar and meterN"
 
-rawLastVers123sol=$(curl -f -s https://123solar.org/latest_version.php)
+rawLastVers123sol=$(curl -f -s -k https://123solar.org/latest_version.php)
 if [[ $? -ne 0 ]] ; then
 	logError "Error retrieving 123solar last version. Exiting."
 	exit 1
 fi
-rawLastVersMetern=$(curl -f -s https://metern.org/latest_version.php)
+rawLastVersMetern=$(curl -f -s -k https://metern.org/latest_version.php)
 if [[ $? -ne 0 ]] ; then
 	logError "Error retrieving 123solar last version. Exiting."
 	exit 1
@@ -67,7 +67,7 @@ if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	link123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->LINK;') && \
 	mkdir -p /tmp/123SolarUpdate && \
 	cd /tmp/123SolarUpdate && \
-	wget -q $link123sol && \
+	wget -q --no-check-certificate $link123sol && \
 	tar -xzf 123solar*.tar.gz && \
 	rm -rf 123solar*.tar.gz
 	if [[ $? -ne 0 ]] ; then
@@ -106,7 +106,7 @@ if [ "$lastVersMetern" != "$instVersMetern" ]; then
 	linkMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->LINK;') && \
 	mkdir -p /tmp/meternUpdate && \
 	cd /tmp/meternUpdate && \
-	wget -q $linkMetern && \
+	wget -q --no-check-certificate $linkMetern && \
 	tar -xzf metern*.tar.gz && \
 	rm -rf metern*.tar.gz
 	if [[ $? -ne 0 ]] ; then

@@ -23,7 +23,7 @@ logSubTitle "[comapps] Updating..."
 linkcomapps="http://www.flanesi.it/blog/download/comapps_solarstretch.zip" && \
 mkdir -p /tmp/comapps && \
 cd /tmp/comapps && \
-wget -q $linkcomapps && \
+wget -q --no-check-certificate $linkcomapps && \
 unzip -q comapps_*.zip && \
 rm -rf comapps_*.zip
 if [[ $? -ne 0 ]] ; then
