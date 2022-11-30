@@ -18,22 +18,23 @@ function logError() {
 
 logTitle "Update checking started for 123Solar and meterN"
 
-rawLastVers123sol=$(curl -f -s -k https://123solar.org/latest_version.php)
+rawLastVers123sol=$(curl -f -s -k https://api.github.com/repos/jeanmarc77/123solar/releases/latest)
+
 if [[ $? -ne 0 ]] ; then
 	logError "Error retrieving 123solar last version. Exiting."
 	exit 1
 fi
-rawLastVersMetern=$(curl -f -s -k https://metern.org/latest_version.php)
+rawLastVers123sol=$(curl -f -s -k https://api.github.com/repos/jeanmarc77/meterN/releases/latest)
 if [[ $? -ne 0 ]] ; then
 	logError "Error retrieving 123solar last version. Exiting."
 	exit 1
 fi
 
-lastVers123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->LASTVERSION;' |cut -d ' ' -f2)
-lastVersMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->LASTVERSION;' |cut -d ' ' -f2)
+lastVers123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->tag_name;')
+lastVersMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->tag_name;')
 
-instVers123sol=$(grep VERSION /var/www/123solar/scripts/version.php |cut -d \' -f2 |cut -d ' ' -f2)
-instVersMetern=$(grep VERSION /var/www/metern/scripts/version.php |cut -d \' -f2 |cut -d ' ' -f2)
+instVers123sol=$(grep VERSION /var/www/123solar/scripts/version.php |cut -d \' -f2)
+instVersMetern=$(grep VERSION /var/www/metern/scripts/version.php |cut -d \' -f2)
 
 logSubTitle "[123Solar] Installed version: $instVers123sol"
 logSubTitle "[123Solar] Last version: $lastVers123sol"
@@ -64,7 +65,7 @@ fi
 if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	logSubTitle "[123Solar] Updating..."
 	
-	link123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->LINK;') && \
+	link123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->browser_download_url;') && \
 	mkdir -p /tmp/123SolarUpdate && \
 	cd /tmp/123SolarUpdate && \
 	wget -q --no-check-certificate $link123sol && \
@@ -103,7 +104,7 @@ fi
 if [ "$lastVersMetern" != "$instVersMetern" ]; then
 	logSubTitle "[meterN] Updating..."
 	
-	linkMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->LINK;') && \
+	linkMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->browser_download_url;') && \
 	mkdir -p /tmp/meternUpdate && \
 	cd /tmp/meternUpdate && \
 	wget -q --no-check-certificate $linkMetern && \
