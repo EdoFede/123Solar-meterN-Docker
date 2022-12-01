@@ -32,7 +32,7 @@ RUN mkdir -p /build/libmodbus && \
 	make -s -C /build/SDM120C/ clean && \
 	make -s -C /build/SDM120C/ && \
 # Build Aurora interface
-	wget http://www.curtronics.com/Solar/ftp/aurora-1.9.3.tar.gz -P /build/ && \
+	wget http://www.curtronics.com/Solar/ftp/aurora-1.9.4.tar.gz -P /build/ && \
 	tar -xzvf /build/aurora*.tar.gz -C /build/ && \
 	rm /build/aurora*.tar.gz && \
 	mv /build/aurora* /build/aurora && \
