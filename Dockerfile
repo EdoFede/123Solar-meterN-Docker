@@ -67,7 +67,7 @@ RUN	apk update && \
 COPY imageFiles/ /
 
 # Setup base system and services
-RUN sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php7/php.ini && \
+RUN sed -i "s/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/" /etc/php81/php.ini && \
 	adduser nginx dialout && \
 	adduser nginx uucp && \
 	chmod 755 /var/www/scripts/update123solarAndMetern.sh && \

@@ -29,7 +29,7 @@ server {
 		if (!-f $document_root$fastcgi_script_name) {
 			return 404;
 		}
-		fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+		fastcgi_pass unix:/run/php/php8.1-fpm.sock;
 		fastcgi_param PATH_TRANSLATED $document_root$fastcgi_script_name;
 		include fastcgi_params;
 	}
