@@ -24,9 +24,9 @@ if [[ $? -ne 0 ]] ; then
 	logError "Error retrieving 123solar last version. Exiting."
 	exit 1
 fi
-rawLastVers123sol=$(curl -f -s -k https://api.github.com/repos/jeanmarc77/meterN/releases/latest)
+rawLastVersMetern=$(curl -f -s -k https://api.github.com/repos/jeanmarc77/meterN/releases/latest)
 if [[ $? -ne 0 ]] ; then
-	logError "Error retrieving 123solar last version. Exiting."
+	logError "Error retrieving meterN last version. Exiting."
 	exit 1
 fi
 
@@ -65,7 +65,7 @@ fi
 if [ "$lastVers123sol" != "$instVers123sol" ]; then
 	logSubTitle "[123Solar] Updating..."
 	
-	link123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->browser_download_url;') && \
+	link123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->assets[0]->browser_download_url;') && \
 	mkdir -p /tmp/123SolarUpdate && \
 	cd /tmp/123SolarUpdate && \
 	wget -q --no-check-certificate $link123sol && \
@@ -104,7 +104,7 @@ fi
 if [ "$lastVersMetern" != "$instVersMetern" ]; then
 	logSubTitle "[meterN] Updating..."
 	
-	linkMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->browser_download_url;') && \
+	linkMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->assets[0]->browser_download_url;') && \
 	mkdir -p /tmp/meternUpdate && \
 	cd /tmp/meternUpdate && \
 	wget -q --no-check-certificate $linkMetern && \
