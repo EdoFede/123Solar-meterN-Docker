@@ -33,8 +33,8 @@ fi
 lastVers123sol=$(echo $rawLastVers123sol |php -r 'echo json_decode(fgets(STDIN))->tag_name;')
 lastVersMetern=$(echo $rawLastVersMetern |php -r 'echo json_decode(fgets(STDIN))->tag_name;')
 
-instVers123sol=$(grep VERSION /var/www/123solar/scripts/version.php |cut -d \' -f2)
-instVersMetern=$(grep VERSION /var/www/metern/scripts/version.php |cut -d \' -f2)
+instVers123sol=$(grep VERSION /var/www/123solar/scripts/version.php |cut -d \' -f2 |cut -d ' ' -f2)
+instVersMetern=$(grep VERSION /var/www/metern/scripts/version.php |cut -d \' -f2 |cut -d ' ' -f2)
 
 logSubTitle "[123Solar] Installed version: $instVers123sol"
 logSubTitle "[123Solar] Last version: $lastVers123sol"

@@ -19,7 +19,7 @@ RUN apk update && \
 		wget
 # Build libmodbus library
 RUN mkdir -p /build/libmodbus && \
-	git clone https://github.com/stephane/libmodbus /build/libmodbus && \
+	git clone -b v3.1.7 https://github.com/stephane/libmodbus /build/libmodbus && \
 	cd /build/libmodbus && \
 	./autogen.sh && \
 	./configure --prefix=/usr && \
