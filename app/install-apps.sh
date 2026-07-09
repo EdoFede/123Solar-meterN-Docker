@@ -1,14 +1,13 @@
 #!/bin/sh
-# app/install-apps.sh — recupero/pinning del codice delle app (SCAFFOLD)
+# app/install-apps.sh — fetch/pin the app code (SCAFFOLD)
 #
-# Da implementare. Comportamento previsto:
-#   - scarica 123Solar e meterN nelle versioni scelte (SOLAR123_VERSION /
-#     METERN_VERSION, release GitHub) nel volume condiviso del codice
-#   - preserva config/data esistenti tra un update e l'altro
+# To be implemented. Expected behavior:
+#   - download 123Solar and meterN at the chosen versions (SOLAR123_VERSION /
+#     METERN_VERSION, GitHub releases) into the shared app-code volume
+#   - preserve existing config/data across updates
 #
-# È il punto UNICO dove si concretizza la scelta:
-#   populate one-shot al primo avvio  vs  incluso nell'immagine con versioni pinnate.
-# Vedi docs/GUIDA-IMPLEMENTAZIONE.md §3.1/§3.2 e docs/ANALISI-PROGETTO.md §3.4.
+# This is the SINGLE place where the choice is made:
+#   one-shot populate at first boot  vs  baked into the image with pinned versions.
 set -e
 
 echo "install-apps: not yet implemented" >&2

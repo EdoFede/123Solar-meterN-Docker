@@ -1,13 +1,11 @@
 #!/bin/sh
-# php/entrypoint.sh — entrypoint del container php (SCAFFOLD)
+# php/entrypoint.sh — php container entrypoint (SCAFFOLD)
 #
-# Da implementare. Comportamento previsto:
-#   - avvio del daemon seriale:  pooler485 &
-#   - (opz.) trigger bootstrap del polling
-#   - (opz.) auto-update delle app se AUTO_UPDATE=true (vedi app/install-apps.sh)
-#   - infine:  exec php-fpm
-#
-# Vedi docs/GUIDA-IMPLEMENTAZIONE.md §3.2.
+# To be implemented. Expected behavior:
+#   - start the serial daemon:  pooler485 &
+#   - (optional) trigger the polling bootstrap
+#   - (optional) auto-update the apps if AUTO_UPDATE=true (see app/install-apps.sh)
+#   - finally:  exec php-fpm
 set -e
 
 echo "entrypoint: not yet implemented" >&2

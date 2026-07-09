@@ -1,53 +1,48 @@
 # 123Solar + meterN — Docker (multi-container)
 
-Immagine/orchestrazione Docker per eseguire [123Solar](https://123solar.org/) e
-[meterN](https://www.metern.net/) in un'architettura **multi-container** basata
-su Docker Compose e immagini ufficiali `nginx` / `php:fpm`.
+Docker image/orchestration to run [123Solar](https://123solar.org/) and
+[meterN](https://www.metern.net/) in a **multi-container** architecture based on
+Docker Compose and the official `nginx` / `php:fpm` images.
 
-> ⚠️ **Work in progress (v2).** Questa è la nuova architettura multi-container.
-> La versione precedente (immagine unica a 3 layer con runit/syslog-ng) è
-> archiviata sul branch [`legacy/v1`](../../tree/legacy/v1) (tag `v1-final`).
+> ⚠️ **Work in progress (v2).** This is the new multi-container architecture.
+> The previous version (single 3-layer image with runit/syslog-ng) is archived
+> on the [`legacy/v1`](../../tree/legacy/v1) branch (tag `v1-final`).
 
 ---
 
 ## Quickstart
 
 ```sh
-cp .env.example .env      # adatta porte, timezone, device seriale
+cp .env.example .env      # adjust ports, timezone, serial device
 docker compose up -d
 ```
 
-Poi apri `http://localhost:8080` (o la porta impostata in `HTTP_PORT`).
+Then open `http://localhost:8080` (or the port set in `HTTP_PORT`).
 
-## Variabili d'ambiente
+## Environment variables
 
-| Variabile | Default | Descrizione |
+| Variable | Default | Description |
 |---|---|---|
-| `HTTP_PORT` | `8080` | Porta HTTP esposta dal container web (nginx) |
-| `TZ` | `Europe/Rome` | Timezone del container |
-| `SERIAL_DEVICE` | `/dev/ttyUSB0` | Device seriale RS485 passato al container php |
-| `AUTO_UPDATE` | `false` | Aggiorna le app al boot se `true` |
-| `SOLAR123_VERSION` | `latest` | Versione pinnata di 123Solar |
-| `METERN_VERSION` | `latest` | Versione pinnata di meterN |
+| `HTTP_PORT` | `8080` | HTTP port exposed by the web container (nginx) |
+| `TZ` | `Europe/Rome` | Container timezone |
+| `SERIAL_DEVICE` | `/dev/ttyUSB0` | RS485 serial device passed to the php container |
+| `AUTO_UPDATE` | `false` | Update the apps at boot when `true` |
+| `SOLAR123_VERSION` | `latest` | Pinned 123Solar version |
+| `METERN_VERSION` | `latest` | Pinned meterN version |
 
-## Volumi
+## Volumes
 
-- **codice app** — condiviso tra `web` (nginx) e `php` (montato su `/var/www`)
-- **config/data 123Solar** — configurazione e database RRD
-- **config/data meterN** — configurazione e database RRD
+- **app code** — shared between `web` (nginx) and `php` (mounted at `/var/www`)
+- **123Solar config/data** — configuration and RRD database
+- **meterN config/data** — configuration and RRD database
 
-## Immagini
+## Images
 
-Pubblicate multi-arch su:
+Published multi-arch on:
 
 - Docker Hub: `edofede/123solar-metern`
 - GHCR: `ghcr.io/edofede/123solar-metern`
 
-## Documentazione
+## License
 
-- [Analisi del progetto](docs/ANALISI-PROGETTO.md)
-- [Guida implementativa](docs/GUIDA-IMPLEMENTAZIONE.md)
-
-## Licenza
-
-Vedi [LICENSE](LICENSE).
+See [LICENSE](LICENSE).

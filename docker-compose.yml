@@ -1,11 +1,9 @@
-# docker-compose.yml — orchestrazione multi-container (SCAFFOLD)
+# docker-compose.yml — multi-container orchestration (SCAFFOLD)
 #
-# Da implementare nella chat di implementazione. Contenuto previsto:
-#   - servizio `web`: nginx:alpine ufficiale, monta nginx/default.conf + volume
-#     codice app, espone ${HTTP_PORT}
-#   - servizio `php`: build ./php, monta il volume codice app su /var/www,
+# To be implemented in the implementation chat. Expected content:
+#   - `web` service: official nginx:alpine, mounts nginx/default.conf + app-code
+#     volume, exposes ${HTTP_PORT}
+#   - `php` service: builds ./php, mounts the app-code volume at /var/www,
 #     `devices: ${SERIAL_DEVICE}`, `env_file: .env`
-#   - volumi: app-code (condiviso web<->php), config/data 123solar, config/data metern
-#   - (opz.) servizio cron per i polling schedulati
-#
-# Vedi docs/GUIDA-IMPLEMENTAZIONE.md §3.2 e docs/ANALISI-PROGETTO.md §4.
+#   - volumes: app-code (shared web<->php), 123solar config/data, metern config/data
+#   - (optional) cron service for scheduled polling
