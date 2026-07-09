@@ -1,0 +1,21 @@
+name: ci
+on:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build (amd64, no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./php
+          platforms: linux/amd64
+          push: false
+          load: true
+          tags: 123solar-metern:ci
+      # - name: Smoke test
+      #   run: docker run --rm 123solar-metern:ci php -v
