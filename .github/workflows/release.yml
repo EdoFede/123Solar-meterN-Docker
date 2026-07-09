@@ -1,7 +1,11 @@
 name: release
+
+# The heavy multi-arch build + publish runs ONLY when you push a version tag
+# (e.g. `git tag v1.2.3 && git push origin v1.2.3`), reproducing the old flow:
+# a new tag/release builds the image and also updates the `latest` tag.
+# Plain pushes to master do NOT publish — they only run the amd64 test in ci.yml.
 on:
   push:
-    branches: [main, master]
     tags: ['v*']
 
 jobs:
@@ -23,7 +27,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Login Docker Hub          # remove if publishing to GHCR only
+      - name: Login Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -35,11 +39,16 @@ jobs:
         with:
           images: |
             ghcr.io/edofede/123solar-metern
-            edofede/123solar-metern     # remove if publishing to GHCR only
+            edofede/123solar-metern
+          # From tag `v1.2.3` produce: 1.2.3, 1.2, 1  (the `v` is stripped),
+          # and `latest`. `latest` is attached only for non-prerelease tags
+          # (so `v1.2.3-rc1` publishes 1.2.3-rc1 but does NOT move `latest`).
           tags: |
-            type=ref,event=branch
             type=semver,pattern={{version}}
-            type=sha,format=short
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+          flavor: |
+            latest=auto
 
       - name: Build & push (php image)
         uses: docker/build-push-action@v6

@@ -2,6 +2,9 @@ name: ci
 on:
   pull_request:
     branches: [main, master]
+  push:
+    branches: [main, master]
+    tags-ignore: ['v*']   # version tags are handled by release.yml (full multi-arch + publish)
 
 jobs:
   build-test:
