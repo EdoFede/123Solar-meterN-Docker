@@ -1,9 +1,54 @@
-# docker-compose.yml — multi-container orchestration (SCAFFOLD)
+# docker-compose.yml — 123Solar + meterN, multi-container
 #
-# To be implemented in the implementation chat. Expected content:
-#   - `web` service: official nginx:alpine, mounts nginx/default.conf + app-code
-#     volume, exposes ${HTTP_PORT}
-#   - `php` service: builds ./php, mounts the app-code volume at /var/www,
-#     `devices: ${SERIAL_DEVICE}`, `env_file: .env`
-#   - volumes: app-code (shared web<->php), 123solar config/data, metern config/data
-#   - (optional) cron service for scheduled polling
+#   web  → official nginx:alpine, serves static files + reverse-proxies PHP
+#   php  → custom thin image (php-fpm + serial tools), runs the apps
+#
+# Copy .env.example to .env and adjust values first:  cp .env.example .env
+
+services:
+  web:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+    volumes:
+      - app-code:/var/www:ro
+      # nginx needs the per-app config (for the basic-auth .htpasswd) and data
+      # (RRD graphs served as static files), same volumes the php container writes.
+      - s123_config:/var/www/123solar/config:ro
+      - s123_data:/var/www/123solar/data:ro
+      - mn_config:/var/www/metern/config:ro
+      - mn_data:/var/www/metern/data:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    environment:
+      - TZ=${TZ:-Europe/Rome}
+    depends_on:
+      - php
+
+  php:
+    build:
+      context: ./php
+    image: ghcr.io/edofede/123solar-metern:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - TZ=${TZ:-Europe/Rome}
+      - WEB_HOST=web
+      - WEB_PORT=80
+    # RS485 serial adapter for pooler485/sdm120c/aurora.
+    # Comment this out on hosts without the device (e.g. first-time testing).
+    devices:
+      - "${SERIAL_DEVICE:-/dev/ttyUSB0}:/dev/ttyUSB0"
+    volumes:
+      - app-code:/var/www
+      - s123_config:/var/www/123solar/config
+      - s123_data:/var/www/123solar/data
+      - mn_config:/var/www/metern/config
+      - mn_data:/var/www/metern/data
+
+volumes:
+  app-code:
+  s123_config:
+  s123_data:
+  mn_config:
+  mn_data:

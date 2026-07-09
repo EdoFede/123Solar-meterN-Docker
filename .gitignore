@@ -5,9 +5,8 @@
 build_tmp/
 *.log
 
-# App code fetched at build/first-run (populated by app/install-apps.sh)
-app/123solar/
-app/metern/
+# App code + config/data live in Docker volumes (populated at first boot by
+# php/install-apps.sh), never in the repo.
 
 # OS / editor cruft
 .DS_Store

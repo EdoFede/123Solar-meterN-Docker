@@ -17,5 +17,15 @@ jobs:
           push: false
           load: true
           tags: 123solar-metern:ci
-      # - name: Smoke test
-      #   run: docker run --rm 123solar-metern:ci php -v
+
+      - name: Smoke test — php-fpm config + serial tools
+        run: |
+          docker run --rm --entrypoint php-fpm 123solar-metern:ci -t
+          docker run --rm --entrypoint sh 123solar-metern:ci -c '
+            set -e
+            sdm120c 2>&1 | grep -q "ModBus RTU"
+            ldd /usr/local/bin/sdm120c | grep -q libmodbus
+            command -v aurora rrdtool pooler485 reqLineValues >/dev/null
+            id www-data | grep -q dialout
+            echo "smoke test OK"
+          '
