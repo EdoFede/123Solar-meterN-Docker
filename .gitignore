@@ -1,0 +1,14 @@
+# Environment files (never commit real secrets/config)
+.env
+
+# Local build artifacts
+build_tmp/
+*.log
+
+# App code fetched at build/first-run (populated by app/install-apps.sh)
+app/123solar/
+app/metern/
+
+# OS / editor cruft
+.DS_Store
+*.swp

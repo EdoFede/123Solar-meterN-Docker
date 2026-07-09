@@ -1,0 +1,9 @@
+# Keep the build context small: exclude repo metadata and docs
+.git
+.github/
+docs/
+*.md
+.env
+.env.example
+build_tmp/
+.DS_Store
