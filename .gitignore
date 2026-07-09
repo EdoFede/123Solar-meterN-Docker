@@ -5,8 +5,15 @@
 build_tmp/
 *.log
 
-# App code + config/data live in Docker volumes (populated at first boot by
+# App code lives in a Docker-managed volume (populated at first boot by
 # php/install-apps.sh), never in the repo.
+#
+# config/ and data/ are host bind-mounts: keep the directory structure
+# (.gitkeep) but ignore the runtime content (user config, .htpasswd, RRD DBs…).
+/config/*/*
+!/config/*/.gitkeep
+/data/*/*
+!/data/*/.gitkeep
 
 # OS / editor cruft
 .DS_Store

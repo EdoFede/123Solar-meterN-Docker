@@ -51,9 +51,18 @@ Then open `http://localhost:8080` (or the port set in `HTTP_PORT`).
 
 ## Volumes
 
-- **app code** — shared between `web` (nginx) and `php` (mounted at `/var/www`)
-- **123Solar config/data** — configuration and RRD database
-- **meterN config/data** — configuration and RRD database
+- **app code** — Docker-managed volume (`app-code`), shared between `web`
+  (nginx) and `php` (mounted at `/var/www`), populated at first boot.
+- **config/data** — **host bind-mounts** relative to the compose file, so the
+  apps' configuration and RRD databases live on the host and survive
+  `docker compose down -v`:
+
+  ```
+  ./config/123Solar  ->  /var/www/123solar/config
+  ./config/meterN    ->  /var/www/metern/config
+  ./data/123Solar    ->  /var/www/123solar/data
+  ./data/meterN      ->  /var/www/metern/data
+  ```
 
 ## Images
 
