@@ -36,17 +36,22 @@ RUN apk add --no-cache \
 
 # libmodbus (shared library used by sdm120c)
 #
-# 3.2.0 uses the Linux termios2 API (TCGETS2/TCSETS2) for custom baud rates.
-# On Alpine/musl the `struct termios2` is visible via <asm/termbits.h> but the
-# TCGETS2/TCSETS2 macros live in <asm/ioctls.h>, which musl's <termios.h> does
-# not pull in — so the build fails with "TCGETS2 undeclared". We add those two
-# kernel headers inside modbus-rtu.c's existing Linux-only include block (right
-# before <linux/serial.h>, which is already guarded by #ifdef __linux__).
+# 3.2.0 adds an optional termios2 code path (TCGETS2/TCSETS2) for *arbitrary*
+# custom baud rates, gated by the configure check HAVE_STRUCT_TERMIOS2. On
+# Alpine/musl that path does not build portably: the kernel header that carries
+# `struct termios2` (<asm/termbits.h>) also redefines `struct termios`, clashing
+# with musl's own <termios.h> ("redefinition of struct termios"), and the exact
+# breakage varies by architecture and musl version.
+#
+# We don't need custom baud rates — sdm120c/aurora use standard rates (9600,
+# etc.) served fine by the POSIX termios path. So we force the termios2 check
+# OFF (ac_cv_type_struct_termios2=no); libmodbus then uses plain <termios.h>
+# and builds cleanly and identically on every target arch (amd64, arm64,
+# arm/v7, arm/v6, 386, ppc64le). No source patching required.
 RUN git clone --depth 1 -b "${LIBMODBUS_VERSION}" https://github.com/stephane/libmodbus /build/libmodbus && \
     cd /build/libmodbus && \
-    sed -i 's|#include <linux/serial.h>|#include <asm/ioctls.h>\n#include <asm/termbits.h>\n#include <linux/serial.h>|' src/modbus-rtu.c && \
     ./autogen.sh && \
-    ./configure --prefix=/usr && \
+    ac_cv_type_struct_termios2=no ./configure --prefix=/usr && \
     make && \
     make install
 
