@@ -40,15 +40,17 @@ jobs:
           images: |
             ghcr.io/edofede/123solar-metern
             edofede/123solar-metern
-          # From tag `v1.2.3` produce: 1.2.3, 1.2, 1  (the `v` is stripped),
-          # and `latest`. `latest` is attached only for non-prerelease tags
-          # (so `v1.2.3-rc1` publishes 1.2.3-rc1 but does NOT move `latest`).
+          # This project uses two-part version tags (vX.Y), not full 3-part
+          # SemVer, so we cannot use type=semver (it only matches vX.Y.Z).
+          # type=match extracts the numeric parts from the git tag:
+          #   v5.0  -> 5.0  and  5      plus the `latest` tag.
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+            type=match,pattern=v(\d+\.\d+),group=1
+            type=match,pattern=v(\d+)\.\d+,group=1
+            type=raw,value=latest
+          # The `v` prefix is stripped by the patterns above.
           flavor: |
-            latest=auto
+            latest=false
 
       - name: Build & push (php image)
         uses: docker/build-push-action@v6
