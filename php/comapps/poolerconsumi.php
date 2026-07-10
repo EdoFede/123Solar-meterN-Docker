@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 if (isset($_SERVER['REMOTE_ADDR'])) {
     die('Direct access not permitted');

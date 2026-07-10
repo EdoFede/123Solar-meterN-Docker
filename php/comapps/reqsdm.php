@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 // This script will output a meterN compatible format for the main or live command
 // You'll need to setup correct permission chmod +x 

@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 	// chmod +x then ln -s /var/www/comapps/reqLineValues.php /usr/local/bin/reqLineValues
 	

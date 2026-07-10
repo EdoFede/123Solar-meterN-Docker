@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 // A simple script to test your com app to adjust the com parameters
 // You'll need to setup correct permission chmod +x 

@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 // A virtual meters example for meterN. This script will simulate a house consumption and selfconsumuption meter. You must own a total (import/export) and a production meter. 
 //                         _____  
