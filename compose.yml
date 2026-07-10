@@ -3,7 +3,7 @@ name: 123solar-metern
 services:
   # web  → official nginx:alpine, serves static files + reverse-proxies PHP
   web:
-    container_name: web
+    container_name: 123solar-metern-web
     image: nginx:alpine
     networks:
       - 123solar-metern
@@ -35,7 +35,7 @@ services:
     # php  → custom thin image (php-fpm + serial tools), runs the apps
     build:
       context: ./php
-    container_name: php
+    container_name: 123solar-metern-php
     image: ghcr.io/edofede/123solar-metern:latest
     env_file: .env
     networks:
