@@ -95,6 +95,7 @@ LABEL org.opencontainers.image.title="123solar-metern" \
 #   rrdtool — RRD databases / graphs used by both apps
 #   tzdata  — TZ env support
 #   tar/gzip/openssl — install-apps.sh (download/unpack) + htpasswd generation
+#   fcgi    — provides cgi-fcgi, used by the HEALTHCHECK to ping php-fpm:9000
 RUN apk add --no-cache \
         bash \
         curl \
@@ -103,6 +104,7 @@ RUN apk add --no-cache \
         tar \
         gzip \
         openssl \
+        fcgi \
         libstdc++
 
 # Copy the compiled tools and the libmodbus shared library from the builder.
@@ -122,6 +124,7 @@ COPY comapps/        /opt/comapps/
 COPY static/         /opt/static/
 COPY seed/           /opt/seed/
 COPY entrypoint.sh   /usr/local/bin/entrypoint.sh
+COPY healthcheck.sh  /usr/local/bin/healthcheck.sh
 
 # php-fpm runs as user "www-data" in the official image; give it serial access
 # (dialout/uucp groups) and make the tool binaries + scripts executable.
@@ -129,7 +132,7 @@ COPY entrypoint.sh   /usr/local/bin/entrypoint.sh
 # exactly like the legacy image did via /usr/local/bin symlinks.
 RUN addgroup www-data dialout && \
     addgroup www-data uucp && \
-    chmod 755 /usr/local/bin/entrypoint.sh /usr/local/bin/install-apps.sh && \
+    chmod 755 /usr/local/bin/entrypoint.sh /usr/local/bin/install-apps.sh /usr/local/bin/healthcheck.sh && \
     chmod 4711 /usr/local/bin/sdm120c /usr/local/bin/aurora && \
     sed -i 's/\r$//' /opt/comapps/* && \
     chmod 755 /opt/comapps/* && \
@@ -152,8 +155,9 @@ COPY conf.d/zz-app.ini /usr/local/etc/php/conf.d/zz-app.ini
 
 WORKDIR /var/www
 
+# Ping php-fpm over FastCGI (real request path), not just a config lint.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
-    CMD php-fpm -t || exit 1
+    CMD /usr/local/bin/healthcheck.sh || exit 1
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm", "-F"]

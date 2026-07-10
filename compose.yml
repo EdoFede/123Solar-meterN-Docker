@@ -1,16 +1,14 @@
-# docker-compose.yml — 123Solar + meterN, multi-container
-#
-#   web  → official nginx:alpine, serves static files + reverse-proxies PHP
-#   php  → custom thin image (php-fpm + serial tools), runs the apps
-#
-# Copy .env.example to .env and adjust values first:  cp .env.example .env
+name: 123solar-metern
 
 services:
+  # web  → official nginx:alpine, serves static files + reverse-proxies PHP
   web:
+    container_name: web
     image: nginx:alpine
-    restart: unless-stopped
+    networks:
+      - 123solar-metern
     ports:
-      - "${HTTP_PORT:-8080}:80"
+      - "${HTTP_PORT:-10088}:80"
     volumes:
       - app-code:/var/www:ro
       - ./config/123Solar:/var/www/123solar/config:ro
@@ -21,14 +19,27 @@ services:
     environment:
       - TZ=${TZ:-Europe/Rome}
     depends_on:
-      - php
+      php:
+        condition: service_healthy
+    restart: unless-stopped
+    # nginx:alpine ships busybox wget; hit the static landing page (populated
+    # by the php container's install-apps.sh at first boot).
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/index.html"]
+      interval: 30s
+      timeout: 5s
+      start_period: 40s
+      retries: 3
 
   php:
+    # php  → custom thin image (php-fpm + serial tools), runs the apps
     build:
       context: ./php
+    container_name: php
     image: ghcr.io/edofede/123solar-metern:latest
-    restart: unless-stopped
     env_file: .env
+    networks:
+      - 123solar-metern
     environment:
       - TZ=${TZ:-Europe/Rome}
       - WEB_HOST=web
@@ -41,6 +52,21 @@ services:
       - ./data/123Solar:/var/www/123solar/data
       - ./config/meterN:/var/www/metern/config
       - ./data/meterN:/var/www/metern/data
+    restart: unless-stopped
 
+
+# ─── Volumi ────────────────────────────────────────────────────────
 volumes:
   app-code:
+    name: app-code
+
+
+# ─── Networks ──────────────────────────────────────────────────────
+networks:
+  123solar-metern:
+    name: 123solar-metern
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.26.126.0/26
+          gateway: 172.26.126.1

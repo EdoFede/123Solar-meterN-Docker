@@ -24,20 +24,39 @@ i tool seriali C (`libmodbus`, `sdm120c`, `aurora`) + i *comapps* vendorizzati.
 Il codice delle app (123Solar / meterN) **non è nell'immagine**: viene scaricato
 al primo avvio nel volume condiviso `app-code` da `php/install-apps.sh`.
 
+**Storage:**
+
+- `app-code` → volume Docker gestito (codice app, rigenerabile). `web` lo monta
+  in sola lettura, `php` in lettura/scrittura.
+- `config/` e `data/` → **bind-mount host** (path relativi al `compose.yml`), con
+  una sotto-cartella per app (`123Solar`, `meterN`). Così configurazione e RRD
+  vivono sul filesystem host e sopravvivono a `docker compose down -v`.
+
+**Healthcheck:** entrambi i servizi hanno un healthcheck (vedi §7); `web`
+attende `php` *healthy* (`depends_on: condition: service_healthy`) prima di
+avviarsi.
+
 ### Struttura del repository
 
 ```
 .
-├── docker-compose.yml           # orchestrazione web + php
+├── compose.yml                  # orchestrazione web + php (+ healthcheck web)
 ├── .env.example                 # variabili (copiare in .env)
+├── config/                      # bind-mount host (config app, per-app sotto-cartella)
+│   ├── 123Solar/                #   -> /var/www/123solar/config  (.htpasswd, …)
+│   └── meterN/                  #   -> /var/www/metern/config    (.htpasswd, config_daemon.php)
+├── data/                        # bind-mount host (RRD / dati app)
+│   ├── 123Solar/                #   -> /var/www/123solar/data
+│   └── meterN/                  #   -> /var/www/metern/data
 ├── nginx/
 │   └── default.conf             # server block (montato in nginx ufficiale)
 ├── php/                         # === contesto di build dell'unica immagine ===
-│   ├── Dockerfile               # multi-stage: builder (tool C) + runtime
+│   ├── Dockerfile               # multi-stage: builder (tool C) + runtime + HEALTHCHECK
 │   ├── entrypoint.sh            # install app + bootstrap polling + exec php-fpm
 │   ├── install-apps.sh          # scarica 123Solar/meterN da GitHub (no API)
+│   ├── healthcheck.sh           # ping FastCGI a php-fpm:9000 (usato da HEALTHCHECK)
 │   ├── conf.d/zz-app.ini        # override php.ini
-│   ├── fpm/www.conf             # pool php-fpm (listen :9000, log→stderr)
+│   ├── fpm/www.conf             # pool php-fpm (listen :9000, ping.path, log→stderr)
 │   ├── comapps/                 # script accessori vendorizzati (pooler485, …)
 │   ├── seed/metern/             # config_daemon.php patchato (avvio pooler485)
 │   └── static/                  # landing page + favicon
@@ -104,7 +123,9 @@ Casi tipici e file toccati:
 | Cambiare tuning php-fpm | `php/fpm/www.conf`, `php/conf.d/zz-app.ini` |
 | Cambiare avvio / download app | `php/entrypoint.sh`, `php/install-apps.sh` |
 | Aggiornare uno script comapp | `php/comapps/…` |
-| Aggiungere una variabile d'ambiente | `.env.example` **e** `docker-compose.yml` (+ README) |
+| Cambiare healthcheck `php` | `php/healthcheck.sh`, `php/fpm/www.conf` (ping.path), `php/Dockerfile` (HEALTHCHECK) |
+| Cambiare healthcheck `web` | `compose.yml` (blocco `healthcheck:` del servizio `web`) |
+| Aggiungere una variabile d'ambiente | `.env.example` **e** `compose.yml` (+ README) |
 
 ### 3.3 Build e test in locale (amd64)
 
@@ -125,13 +146,15 @@ docker run --rm --entrypoint sh 123solar-metern:dev -c '
 
 ### 3.4 Test end-to-end con compose
 
-Su una macchina **senza** adattatore seriale, commenta la riga `devices:` del
-servizio `php` in `docker-compose.yml` (oppure usa un override), poi:
+Su una macchina **senza** adattatore seriale, azzera la riga `devices:` del
+servizio `php` con un override (`devices: !reset []`) oppure commentala in
+`compose.yml`, poi:
 
 ```sh
 docker compose up -d --build
 docker compose logs -f php        # osserva install-apps + avvio php-fpm
-curl -I http://localhost:8080/    # 200 sulla landing page
+docker compose ps                 # entrambi i servizi devono diventare (healthy)
+curl -I http://localhost:${HTTP_PORT}/   # 200 sulla landing page
 docker compose down -v            # -v azzera il volume app-code (codice app)
 ```
 
@@ -143,8 +166,8 @@ docker compose down -v            # -v azzera il volume app-code (codice app)
 Verifica basic-auth (dopo il primo avvio, credenziali di default `admin`/`admin`):
 
 ```sh
-curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8080/metern/admin/   # 401
-curl -s -u admin:admin -o /dev/null -w "%{http_code}\n" http://localhost:8080/metern/admin/index.html
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:${HTTP_PORT}/metern/admin/   # 401
+curl -s -u admin:admin -o /dev/null -w "%{http_code}\n" http://localhost:${HTTP_PORT}/metern/admin/
 ```
 
 ### 3.5 (Opzionale ma consigliato) verifica multi-arch localmente
@@ -286,9 +309,13 @@ git tag -a v1.0.1 -m "Release 1.0.1" && git push origin v1.0.1
 # --- sviluppo ---
 docker build -t 123solar-metern:dev ./php          # build amd64
 docker compose up -d --build                        # stack completo
+docker compose ps                                    # stato servizi (healthy?)
 docker compose logs -f php                           # log del container php
 docker compose down -v                               # stop + reset volume app-code
                                                      # (config/ e data/ bind-mount restano sull'host)
+
+# --- healthcheck ---
+docker compose exec php /usr/local/bin/healthcheck.sh    # ping php-fpm FastCGI
 
 # --- multi-arch locale ---
 docker run --privileged --rm tonistiigi/binfmt --install all   # QEMU (una tantum)
@@ -306,3 +333,70 @@ docker buildx imagetools inspect edofede/123solar-metern:latest
 | PR verso `master` | `ci.yml` | build amd64 + smoke test | No |
 | push su `master` | `ci.yml` | build amd64 + smoke test | No |
 | push tag `vX.Y.Z` | `release.yml` | build 6-arch + tag `latest` | **Sì** (Docker Hub + GHCR) |
+
+---
+
+## 7. Healthcheck
+
+Entrambi i servizi espongono un healthcheck; `web` dipende da `php` *healthy*
+(`depends_on: condition: service_healthy`), quindi nginx non parte finché
+php-fpm non risponde davvero.
+
+### 7.1 `php` — ping FastCGI
+
+Definito nel **`php/Dockerfile`** (`HEALTHCHECK`) e implementato in
+**`php/healthcheck.sh`**. Non fa un semplice `php-fpm -t` (che è solo un lint
+della config): interroga php-fpm **sul path reale FastCGI** (`127.0.0.1:9000`,
+lo stesso che usa nginx) tramite `cgi-fcgi`, colpendo l'endpoint `ping.path`
+del pool.
+
+Pezzi coinvolti:
+
+| File | Cosa |
+|---|---|
+| `php/fpm/www.conf` | `ping.path = /ping`, `ping.response = pong`, `pm.status_path = /status` |
+| `php/Dockerfile` | installa `fcgi` (fornisce `cgi-fcgi`) + `HEALTHCHECK` |
+| `php/healthcheck.sh` | `cgi-fcgi -bind -connect 127.0.0.1:9000` su `/ping`, verifica `pong` |
+
+Parametri: `--interval=30s --timeout=5s --start-period=20s --retries=3`.
+
+Test manuale:
+
+```sh
+docker compose exec php /usr/local/bin/healthcheck.sh && echo OK   # exit 0 se healthy
+# risposta grezza del master php-fpm:
+docker compose exec php sh -c \
+  'SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000'
+# -> deve terminare con "pong"
+```
+
+### 7.2 `web` — pagina statica
+
+Definito nel **`compose.yml`** (servizio `web`), perché `nginx:alpine` è
+un'immagine ufficiale che non ricostruiamo. Usa il `wget` di busybox sulla
+landing page statica:
+
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/index.html"]
+  interval: 30s
+  timeout: 5s
+  start_period: 40s   # lascia tempo a php di popolare index.html al primo avvio
+  retries: 3
+```
+
+> `index.html` viene creato da `install-apps.sh` al primo avvio. Lo
+> `start_period` più ampio del `web` copre il caso della prima installazione.
+
+### 7.3 Verifica
+
+```sh
+docker compose ps                                   # colonna STATUS -> (healthy)
+docker inspect web --format '{{.State.Health.Status}}'
+docker inspect php --format '{{.State.Health.Status}}'
+# storico exit code di un check (0 = ok, 1 = fail):
+docker inspect web --format '{{range .State.Health.Log}}{{.ExitCode}} {{end}}'
+```
+
+Uno stato passa a `unhealthy` solo dopo `retries` fallimenti consecutivi (non
+al primo blip): è voluto, per non allarmare su glitch transitori.
