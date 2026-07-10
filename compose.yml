@@ -13,8 +13,6 @@ services:
       - "${HTTP_PORT:-8080}:80"
     volumes:
       - app-code:/var/www:ro
-      # nginx needs the per-app config (for the basic-auth .htpasswd) and data
-      # (RRD graphs served as static files), same paths the php container writes.
       - ./config/123Solar:/var/www/123solar/config:ro
       - ./data/123Solar:/var/www/123solar/data:ro
       - ./config/meterN:/var/www/metern/config:ro
@@ -35,8 +33,6 @@ services:
       - TZ=${TZ:-Europe/Rome}
       - WEB_HOST=web
       - WEB_PORT=80
-    # RS485 serial adapter for pooler485/sdm120c/aurora.
-    # Comment this out on hosts without the device (e.g. first-time testing).
     devices:
       - "${SERIAL_DEVICE:-/dev/ttyUSB0}:/dev/ttyUSB0"
     volumes:
@@ -47,7 +43,4 @@ services:
       - ./data/meterN:/var/www/metern/data
 
 volumes:
-  # Shared app code (123Solar/meterN), populated at first boot by
-  # php/install-apps.sh. Kept as a Docker-managed volume (rebuildable);
-  # config/ and data/ are bind-mounted to the host (see the services above).
   app-code:
