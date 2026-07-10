@@ -17,7 +17,7 @@ while [ true ]; do
     do
     #((ID++))
     ID=$ADDRESS
-	CMD="sdm120c -a ${ADDRESS} -b ${BAUD_RATE} -z 10 -i -p -v -c -f -g -P N -w 10 -j 10 -d 0 -q ${DEVICE}"
+	CMD="sdm120c -a ${ADDRESS} -b ${BAUD_RATE} -P N -pvcfgi -q -z 3 -j 10 -D 50 -w 1 -W 50 -d 0 -q ${DEVICE}"
 
     #echo $CMD
     
