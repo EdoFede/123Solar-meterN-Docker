@@ -107,6 +107,11 @@ RUN apk add --no-cache \
         fcgi \
         libstdc++
 
+# PHP extensions required by the apps that are NOT bundled in php:fpm-alpine.
+#   calendar — meterN/123solar use cal_days_in_month() (programreadings.php…)
+# (curl, json, mbstring and posix are already built into the base image.)
+RUN docker-php-ext-install calendar
+
 # Copy the compiled tools and the libmodbus shared library from the builder.
 COPY --from=builder \
         /build/SDM120C/sdm120c \
